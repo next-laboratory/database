@@ -1,0 +1,28 @@
+{
+  "name": "max/database",
+  "type": "library",
+  "license": "Apache-2.0",
+  "homepage": "https://www.chengyao.xyz",
+  "description": "MaxPHP数据库操作组件！",
+  "authors": [
+    {
+      "name": "chengyao",
+      "email": "bigyao@139.com"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Max\\": "src/"
+    }
+  },
+  "require": {
+    "php": ">=7.2.0",
+    "ext-pdo": "*",
+    "ext-json": "*"
+  },
+  "extra": {
+    "max": {
+      "config": "src/database.php"
+    }
+  }
+}
