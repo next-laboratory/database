@@ -62,10 +62,10 @@ class Query
      */
     public static $__refreshable = true;
 
-    /**
-     * @var Log
-     */
-    protected $log;
+//     /**
+//      * @var Log
+//      */
+//     protected $log;
 
     /**
      * 数据库驱动
@@ -82,7 +82,7 @@ class Query
     public function __construct(App $app)
     {
         $this->app      = $app;
-        $this->log      = $app['log'];
+//         $this->log      = $app['log'];
         $this->database = $app->config->get('database.default');
         $builder        = static::NAMESPACE . ucfirst($this->database);
         $this->builder  = new $builder;
@@ -363,7 +363,7 @@ class Query
         $duration = microtime(true) - $startTime;
         $slowLog  = $this->app->config->get('database.slow_log');
         if ($slowLog && 1000 * $duration >= $slowLog) {
-            $this->log->debug("SQL: {$this->generateSQL($query, $bindParams)}", ['URL' => $this->app['request']->url(true), 'Time' => round(($duration) * 1000, 2) . 'ms', 'query' => $query, 'bindParams' => json_encode($bindParams)]);
+            $this->app['log']->debug("SQL: {$this->generateSQL($query, $bindParams)}", ['URL' => $this->app['request']->url(true), 'Time' => round(($duration) * 1000, 2) . 'ms', 'query' => $query, 'bindParams' => json_encode($bindParams)]);
         }
         $this->builder->flush();
         return $this->PDOstatement;
