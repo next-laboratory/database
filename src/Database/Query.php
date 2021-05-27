@@ -325,7 +325,7 @@ class Query
             return $result;
         } catch (\PDOException $e) {
             $pdo->rollback();
-            throw new \Exception($e->getMessage(), (int)$e->getCode());
+            throw $e;
         } finally {
             $pdo->setAttribute(\PDO::ATTR_AUTOCOMMIT, 1);
         }
