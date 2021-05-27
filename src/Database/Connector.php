@@ -29,10 +29,7 @@ class Connector
     public function dsn(array $config)
     {
         if (!isset($config['dsn']) || empty($dsn = $config['dsn'])) {
-            $dsn = $this->database . ':';
-            $dsn .= "host={$config['host']};";
-            $dsn .= "port={$config['port']};";
-            $dsn .= "dbname={$config['dbname']};";
+            $dsn = "{$this->database}:host={$config['host']};port={$config['port']};dbname={$config['dbname']};";
         }
         return $dsn;
     }
@@ -51,11 +48,16 @@ class Connector
         );
     }
 
+    public function connectionPool()
+    {
+
+    }
+
     /**
      * PDO实例
      * @return mixed
      */
-    public function handle()
+    public function handle($type = null)
     {
         return $this->pdo;
     }

@@ -8,7 +8,7 @@ use Max\Log\Log;
 
 /**
  * 数据库外部接口
- * @method $this name(string $table_name, string $alias = '') 表名设置方法,不带前缀
+ * @method $this name(string $table_name, string $alias = '') 表名设置方法, 不带前缀
  * @method $this table(string $table_name, string $alias = '') 表名设置方法，带前缀
  * @method $this where(array $where, string $operator = '=')
  * @method $this whereLike(array $whereLike)
@@ -100,11 +100,12 @@ class Query
 
     /**
      * PDO实例
-     * @return \PDO
+     * @param string $type
+     * @return mixed
      */
-    public function PDO()
+    public function PDO(string $type = 'read')
     {
-        return $this->app->make(Connector::class)->handle();
+        return $this->app->make(Connector::class)->handle($type);
     }
 
     /**

@@ -25,7 +25,11 @@ return [
         //编码
         'charset' => env('database . charset', 'utf8mb4'),
         //数据表前缀
-        'prefix'  => ''
+        'prefix'  => '',
+        //主
+        'master'  => [],
+        //从
+        'slave'   => []
     ],
 
 //    'pgsql' => [
