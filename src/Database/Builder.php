@@ -109,7 +109,7 @@ class Builder
             if (is_numeric($key)) {
                 $this->where .= " AND {$value}";
             } else {
-                $this->where .= " AND {$key} {$operator} ?";
+                $this->where        .= " AND {$key} {$operator} ?";
                 $this->bindParams[] = $value;
             }
         }
@@ -127,7 +127,7 @@ class Builder
             if (is_numeric($field)) {
                 $this->where .= " AND {$like}";
             } else {
-                $this->where .= " AND {$field} LIKE ?";
+                $this->where        .= " AND {$field} LIKE ?";
                 $this->bindParams[] = $like;
             }
         }
@@ -180,7 +180,7 @@ class Builder
             if (is_numeric($key)) {
                 $this->where .= " OR {$value}";
             } else {
-                $this->where .= " OR {$key} {$operator} ?";
+                $this->where        .= " OR {$key} {$operator} ?";
                 $this->bindParams[] = $value;
             }
         }
@@ -195,8 +195,8 @@ class Builder
     public function whereIn(array $whereIn)
     {
         foreach ($whereIn as $column => $range) {
-            $range = (array) $range;
-            $bindStr = rtrim(str_repeat('?,', count($range)), ',');
+            $range       = (array)$range;
+            $bindStr     = rtrim(str_repeat('?,', count($range)), ',');
             $this->where .= " AND {$column} IN ({$bindStr})";
             array_push($this->bindParams, ...array_values($range));
         }
@@ -206,8 +206,8 @@ class Builder
     public function whereNotIn($whereNotIn)
     {
         foreach ($whereNotIn as $column => $range) {
-            $range = (array) $range;
-            $bindStr = rtrim(str_repeat('?,', count($range)), ',');
+            $range       = (array)$range;
+            $bindStr     = rtrim(str_repeat('?,', count($range)), ',');
             $this->where .= " AND {$column} NOT IN ({$bindStr})";
             array_push($this->bindParams, ...$range);
         }
@@ -383,7 +383,7 @@ class Builder
             if (is_numeric($groupBy)) {
                 $this->group .= "{$having}, ";
             } else {
-                $this->group .= $groupBy . ', ';
+                $this->group  .= $groupBy . ', ';
                 $this->having .= " AND {$having}";
             }
         }
@@ -468,7 +468,7 @@ class Builder
     public function insert(array $data)
     {
         $this->bindParams = [];
-        $columns = '';
+        $columns          = '';
         if (Arr::isAssoc($data)) {
             $columns = ' (' . implode(',', array_keys($data)) . ')';
         }
@@ -478,20 +478,4 @@ class Builder
         return sprintf(static::INSERT, $this->getTable(), $columns, $values);
     }
 
-    /**
-     * 重置属性
-     */
-    public function flush()
-    {
-        foreach (get_object_vars($this) as $key => $value) {
-            switch ($key) {
-                case 'bindParams':
-                    $this->bindParams = [];
-                    break;
-                default:
-                    $this->{$key} = '';
-                    break;
-            }
-        }
-    }
 }

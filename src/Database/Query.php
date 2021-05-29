@@ -51,7 +51,13 @@ class Query
     protected $debug = false;
 
     /**
-     * SQL构造器
+     * SQL构造器类名
+     * @var string
+     */
+    protected $builderClass = '';
+
+    /**
+     * SQL构造器实例
      * @var Builder
      */
     protected $builder;
@@ -61,11 +67,6 @@ class Query
      * @var bool
      */
     public static $__refreshable = true;
-
-//     /**
-//      * @var Log
-//      */
-//     protected $log;
 
     /**
      * 数据库驱动
@@ -81,11 +82,10 @@ class Query
      */
     public function __construct(App $app)
     {
-        $this->app      = $app;
-//         $this->log      = $app['log'];
-        $this->database = $app->config->get('database.default');
-        $builder        = static::NAMESPACE . ucfirst($this->database);
-        $this->builder  = new $builder;
+        $this->app          = $app;
+        $this->database     = $app->config->get('database.default');
+        $this->builderClass = static::NAMESPACE . ucfirst($this->database);
+        $this->builder      = new $this->builderClass;
     }
 
     /**
@@ -225,21 +225,38 @@ class Query
         return (int)$this->fetch($this->builder->select("SUM({$field})"), $this->builder->getBindParams());
     }
 
+    /**
+     * 查询字段最大值
+     * @param $field
+     * @return int
+     * @throws \Exception
+     */
     public function max($field): int
     {
         return (int)$this->fetch($this->builder->select("MAX({$field})"), $this->builder->getBindParams());
     }
 
+    /**
+     * 查询字段最小值
+     * @param $field
+     * @return int
+     * @throws \Exception
+     */
     public function min($field): int
     {
         return (int)$this->fetch($this->builder->select("MIN({$field})"), $this->builder->getBindParams());
     }
 
+    /**
+     * 查询字段平均值
+     * @param $field
+     * @return int
+     * @throws \Exception
+     */
     public function avg($field): int
     {
         return (int)$this->fetch($this->builder->select("AVG({$field})"), $this->builder->getBindParams());
     }
-
 
     /**
      * @return Collection
@@ -285,23 +302,36 @@ class Query
             ->rowCount();
     }
 
+    /**
+     * 开启事务
+     */
     public function begin()
     {
         $this->autoCommit(false);
         $this->PDO()->beginTransaction();
     }
 
+    /**
+     * 提交事务
+     */
     public function commit()
     {
         $this->PDO()->commit();
         $this->autoCommit();
     }
 
+    /**
+     * 自动提交事务状态更改
+     * @param bool $autoCommit
+     */
     public function autoCommit(bool $autoCommit = true)
     {
         $this->PDO()->setAttribute(\PDO::ATTR_AUTOCOMMIT, $autoCommit);
     }
 
+    /***
+     * 回滚事务
+     */
     public function rollback()
     {
         $this->PDO()->rollBack();
@@ -331,7 +361,6 @@ class Query
             $pdo->setAttribute(\PDO::ATTR_AUTOCOMMIT, 1);
         }
     }
-
 
     /**
      * 由预处理语句和参数列表生成可能的SQL
@@ -366,7 +395,7 @@ class Query
         if ($slowLog && 1000 * $duration >= $slowLog) {
             $this->app['log']->debug("SQL: {$this->generateSQL($query, $bindParams)}", ['URL' => $this->app['request']->url(true), 'Time' => round(($duration) * 1000, 2) . 'ms', 'query' => $query, 'bindParams' => json_encode($bindParams)]);
         }
-        $this->builder->flush();
+        $this->builder = new $this->builderClass;
         return $this->PDOstatement;
     }
 
