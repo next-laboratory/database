@@ -10,11 +10,10 @@ namespace Max\Facade;
  * @method static mixed query(string $sql, array $data = [], bool $all = true) 查询
  * @method static mixed transaction(\Closure $transaction) 事务操作
  * @method static integer exec(string $sql, array $data = []) 增删改
+ * @method static array getHistory() 查询历史SQL和执行时间
  */
 class Db extends Facade
 {
-
-//    protected static $singleInstance = false;
 
     protected static function getFacadeClass()
     {

@@ -71,7 +71,7 @@ class Query
      * @var array
      */
     protected $history = [];
-    
+
     /**
      * 数据库驱动
      * @var string
@@ -387,27 +387,27 @@ class Query
      */
     protected function execute(string $query, array $bindParams = null): \PDOStatement
     {
-        $bindParams = $bindParams ?? $this->builder->getBindParams();
+        $bindParams  = $bindParams ?? $this->builder->getBindParams();
         $queryString = sprintf(str_replace('?', '%s', $query), ...array_map(function ($value) {
-            return is_string($value) ? "'{$value}'" : (string) $value;
+            return is_string($value) ? "'{$value}'" : (string)$value;
         }, $bindParams));
-        array_push($this->history, $queryString);
         if ($this->debug) {
             halt($queryString);
         }
-        $startTime = microtime(true);
+        $startTime          = microtime(true);
         $this->PDOstatement = $this->PDO()->prepare($query);
         $this->PDOstatement->execute($bindParams);
-        $duration = microtime(true) - $startTime;
-        $slowLog = $this->app->config->get('database.slow_log');
+        $duration = round((microtime(true) - $startTime) * 1000, 2);
+        $slowLog  = $this->app->config->get('database.slow_log');
         if ($slowLog && 1000 * $duration >= $slowLog) {
-            $this->app['log']->debug("SQL: {$queryString}", ['URL' => $this->app['request']->url(true), 'Time' => round(($duration) * 1000, 2) . 'ms', 'query' => $query, 'bindParams' => json_encode($bindParams)]);
+            $this->app['log']->debug("SQL: {$queryString}", ['URL' => $this->app['request']->url(true), 'Time' => $duration . 'ms', 'query' => $query, 'bindParams' => json_encode($bindParams)]);
         }
-        $this->builder = new $this->builderClass;
+        $this->history[] = [$queryString, $duration];
+        $this->builder   = new $this->builderClass;
         return $this->PDOstatement;
     }
 
-    
+
     /**
      * 历史SQL取得
      * @return array
@@ -416,5 +416,5 @@ class Query
     {
         return $this->history;
     }
-    
+
 }
