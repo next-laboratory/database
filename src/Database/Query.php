@@ -403,7 +403,7 @@ class Query
         if ($slowLog && 1000 * $duration >= $slowLog) {
             $this->app['log']->debug("SQL: {$queryString}", ['URL' => $this->app['request']->url(true), 'Time' => round(($duration) * 1000, 2) . 'ms', 'query' => $query, 'bindParams' => json_encode($bindParams)]);
         }
-        $this->builder->flush();
+        $this->builder = new $this->builderClass;
         return $this->PDOstatement;
     }
 
