@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace Max\Database;
 
 use Max\Foundation\App;
-use Max\Log\Log;
 
 /**
  * 数据库外部接口
@@ -66,8 +65,13 @@ class Query
      * true 实例将不会保存到容器中
      * @var bool
      */
-    public static $__refreshable = true;
-
+//     public static $__refreshable = true;
+    /**
+     * 历史SQL
+     * @var array
+     */
+    protected $history = [];
+    
     /**
      * 数据库驱动
      * @var string
@@ -368,12 +372,12 @@ class Query
      * @param array $binds
      * @return string
      */
-    protected function generateSQL(string $query, array $binds): string
-    {
-        return sprintf(str_replace('?', '%s', $query), ...array_map(function ($value) {
-            return is_string($value) ? "'{$value}'" : (string)$value;
-        }, $binds));
-    }
+//     protected function generateSQL(string $query, array $binds): string
+//     {
+//         return sprintf(str_replace('?', '%s', $query), ...array_map(function ($value) {
+//             return is_string($value) ? "'{$value}'" : (string)$value;
+//         }, $binds));
+//     }
 
     /**
      * 执行SQL
@@ -384,19 +388,33 @@ class Query
     protected function execute(string $query, array $bindParams = null): \PDOStatement
     {
         $bindParams = $bindParams ?? $this->builder->getBindParams();
+        $queryString = sprintf(str_replace('?', '%s', $query), ...array_map(function ($value) {
+            return is_string($value) ? "'{$value}'" : (string) $value;
+        }, $bindParams));
+        array_push($this->history, $queryString);
         if ($this->debug) {
-            halt($this->generateSQL($query, $bindParams));
+            halt($queryString);
         }
-        $startTime          = microtime(true);
+        $startTime = microtime(true);
         $this->PDOstatement = $this->PDO()->prepare($query);
         $this->PDOstatement->execute($bindParams);
         $duration = microtime(true) - $startTime;
-        $slowLog  = $this->app->config->get('database.slow_log');
+        $slowLog = $this->app->config->get('database.slow_log');
         if ($slowLog && 1000 * $duration >= $slowLog) {
-            $this->app['log']->debug("SQL: {$this->generateSQL($query, $bindParams)}", ['URL' => $this->app['request']->url(true), 'Time' => round(($duration) * 1000, 2) . 'ms', 'query' => $query, 'bindParams' => json_encode($bindParams)]);
+            $this->app['log']->debug("SQL: {$queryString}", ['URL' => $this->app['request']->url(true), 'Time' => round(($duration) * 1000, 2) . 'ms', 'query' => $query, 'bindParams' => json_encode($bindParams)]);
         }
-        $this->builder = new $this->builderClass;
+        $this->builder->flush();
         return $this->PDOstatement;
     }
 
+    
+    /**
+     * 历史SQL取得
+     * @return array
+     */
+    public function getHistory(): array
+    {
+        return $this->history;
+    }
+    
 }
