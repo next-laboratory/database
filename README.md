@@ -29,7 +29,7 @@ composer require max/database
 
 ## 注册服务提供者
 
-在`/config/provider.php` 的`http`中注册服务提供者类`\Max\DatabaseService::class`
+在`/config/app.php` 的`provider`下的`http`中注册服务提供者类`\Max\DatabaseService::class`
 
 ## 配置文件
 
@@ -85,7 +85,7 @@ return [
 ];
 ```
 
-## 助手函数
+## 方法
 
 安装完成后就可以使用`\Max\Facade\Db::name($table);`等的方式来使用缓存扩展，或者使用助手函数`db($tableName)`
 
