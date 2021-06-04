@@ -367,19 +367,6 @@ class Query
     }
 
     /**
-     * 由预处理语句和参数列表生成可能的SQL
-     * @param string $query
-     * @param array $binds
-     * @return string
-     */
-//     protected function generateSQL(string $query, array $binds): string
-//     {
-//         return sprintf(str_replace('?', '%s', $query), ...array_map(function ($value) {
-//             return is_string($value) ? "'{$value}'" : (string)$value;
-//         }, $binds));
-//     }
-
-    /**
      * 执行SQL
      * @param string $query
      * @param array $data
@@ -388,9 +375,14 @@ class Query
     protected function execute(string $query, array $bindParams = null): \PDOStatement
     {
         $bindParams  = $bindParams ?? $this->builder->getBindParams();
-        $queryString = sprintf(str_replace('?', '%s', $query), ...array_map(function ($value) {
-            return is_string($value) ? "'{$value}'" : (string)$value;
-        }, $bindParams));
+        try{
+            $queryString = sprintf(str_replace('?', '%s', $query), ...array_map(function ($value) {
+                return is_string($value) ? "'{$value}'" : (string)$value;
+            }, $bindParams));
+        }catch(Exception $e){
+            $queryString = $query;
+        }
+    
         if ($this->debug) {
             halt($queryString);
         }
