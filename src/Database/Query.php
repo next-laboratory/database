@@ -379,7 +379,7 @@ class Query
             $queryString = sprintf(str_replace('?', '%s', $query), ...array_map(function ($value) {
                 return is_string($value) ? "'{$value}'" : (string)$value;
             }, $bindParams));
-        }catch(Exception $e){
+        }catch(\Exception $e){
             $queryString = $query;
         }
     
