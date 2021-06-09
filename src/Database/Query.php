@@ -391,7 +391,7 @@ class Query
         $this->PDOstatement->execute($bindParams);
         $duration = round((microtime(true) - $startTime) * 1000, 2);
         $slowLog  = $this->app->config->get('database.slow_log');
-        if ($slowLog && 1000 * $duration >= $slowLog) {
+        if ($slowLog && $duration >= $slowLog) {
             $this->app['log']->debug("SQL: {$queryString}", ['URL' => $this->app['request']->url(true), 'Time' => $duration . 'ms', 'query' => $query, 'bindParams' => json_encode($bindParams)]);
         }
         $this->history[] = [$queryString, $duration];
