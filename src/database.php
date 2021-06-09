@@ -5,7 +5,7 @@ return [
     //默认数据库配置
     'default'  => env('database.default', 'mysql'),
     //慢SQL日志记录时间,数字（ms，当执行时间不小于该时间时会记录日志）或者false(关闭日志) ,0 全部记录
-    'slow_log' => 5,
+    'slow_log' => 0,
 
     'mysql' => [
         //可以使用dsn来配置更多参数，会优先使用该参数

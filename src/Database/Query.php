@@ -374,15 +374,15 @@ class Query
      */
     protected function execute(string $query, array $bindParams = null): \PDOStatement
     {
-        $bindParams  = $bindParams ?? $this->builder->getBindParams();
-        try{
+        $bindParams = $bindParams ?? $this->builder->getBindParams();
+        try {
             $queryString = sprintf(str_replace('?', '%s', $query), ...array_map(function ($value) {
                 return is_string($value) ? "'{$value}'" : (string)$value;
             }, $bindParams));
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             $queryString = $query;
         }
-    
+
         if ($this->debug) {
             halt($queryString);
         }
@@ -391,8 +391,8 @@ class Query
         $this->PDOstatement->execute($bindParams);
         $duration = round((microtime(true) - $startTime) * 1000, 2);
         $slowLog  = $this->app->config->get('database.slow_log');
-        if ($slowLog && $duration >= $slowLog) {
-            $this->app['log']->debug("SQL: {$queryString}", ['URL' => $this->app['request']->url(true), 'Time' => $duration . 'ms', 'query' => $query, 'bindParams' => json_encode($bindParams)]);
+        if (false !== $slowLog && $duration >= $slowLog) {
+            $this->app['log']->debug("{$queryString}", ['url' => $this->app['request']->url(true), 'time' => $duration . 'ms', 'querystring' => $query, 'parameters' => json_encode($bindParams)]);
         }
         $this->history[] = [$queryString, $duration];
         $this->builder   = new $this->builderClass;
