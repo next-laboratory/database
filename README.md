@@ -20,6 +20,7 @@ Max框架数据库组件
 ```shell
 composer create-project max/max
 ```
+## 安装
 
 ```shell
 composer require max/database
@@ -87,6 +88,6 @@ return [
 
 ## 方法
 
-安装完成后就可以使用`\Max\Facade\Db::name($table);`等的方式来使用缓存扩展，或者使用助手函数`db($tableName)`
+安装完成后就可以使用`\Max\Facade\Db::name($table);`等的方式来使用Database扩展，或者使用助手函数`db($tableName)`
 
 > 官网：https://www.chengyao.xyz
