@@ -239,8 +239,16 @@ class Builder
      */
     public function whereExists(array $whereExists)
     {
-        foreach ($whereExists as $field => $exist) {
-            $this->where .= " AND {$field} EXISTS({$exist})";
+        foreach ($whereExists as $exist) {
+            $this->where .= " AND EXISTS({$exist})";
+        }
+        return $this;
+    }
+
+    public function whereNotExists(array $whereNotExists)
+    {
+        foreach ($whereNotExists as $exist) {
+            $this->where .= " AND NOT EXISTS({$exist})";
         }
         return $this;
     }
