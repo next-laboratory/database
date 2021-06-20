@@ -3,17 +3,18 @@ declare(strict_types=1);
 
 namespace Max\Database;
 
-use Max\Foundation\App;
+use Max\App;
 
 class Connector
 {
-
-//    const FETCHTYPE = \PDO::FETCH_ASSOC;
-
-//    private $PDOstatement;
-
+    /**
+     * @var \PDO
+     */
     protected $pdo;
 
+    /**
+     * @var mixed|string|null
+     */
     protected $database = null;
 
     public function __construct(App $app)

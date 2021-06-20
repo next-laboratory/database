@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Max\Database;
 
-use Max\Foundation\App;
+use Max\App;
 
 /**
  * 数据库外部接口

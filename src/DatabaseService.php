@@ -21,7 +21,7 @@ namespace {
 
 namespace Max {
 
-    use Max\Contracts\Service;
+    use Max\Service;
 
     class DatabaseService extends Service
     {
