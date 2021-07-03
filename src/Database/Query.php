@@ -392,7 +392,7 @@ class Query
         $duration = round((microtime(true) - $startTime) * 1000, 2);
         $slowLog  = $this->app->config->get('database.slow_log');
         if (false !== $slowLog && $duration >= $slowLog) {
-            $this->app['log']->debug("{$queryString}", ['url' => $this->app['request']->url(true), 'time' => $duration . 'ms', 'querystring' => $query, 'parameters' => json_encode($bindParams)]);
+            $this->app['log']->debug("{$queryString}", ['Time' => $duration . 'ms', 'SQL' => $query]);
         }
         $this->history[] = [$queryString, $duration];
         $this->builder   = new $this->builderClass;

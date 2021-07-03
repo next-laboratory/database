@@ -22,7 +22,9 @@
   },
   "extra": {
     "max": {
-      "configure": "\\Max\\Database\\Configure::install"
+      "config": {
+        "database": "src/database.php"
+      }
     }
   }
 }
