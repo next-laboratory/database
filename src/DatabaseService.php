@@ -1,39 +1,32 @@
 <?php
 declare(strict_types=1);
 
-namespace {
+namespace Max;
 
-    use Max\Database\Driver;
+use Max\Database\Query;
 
-    if (false === function_exists('db')) {
-        /**
-         * db类助手函数
-         * @param string $tableName
-         * @return Driver
-         */
-        function db(string $tableName)
-        {
-            return app('db')->name($tableName);
-        }
+class DatabaseService extends Service
+{
+
+    public function register()
+    {
+        $this->app->bind('db', \Max\Database\Query::class);
+    }
+
+    public function boot()
+    {
     }
 
 }
 
-namespace Max {
-
-    use Max\Service;
-
-    class DatabaseService extends Service
+if (false === function_exists('db')) {
+    /**
+     * DB类助手函数
+     * @param string $tableName
+     * @return Query
+     */
+    function db(string $tableName)
     {
-
-        public function register()
-        {
-            $this->app->bind('db', \Max\Database\Query::class);
-        }
-
-        public function boot()
-        {
-        }
-
+        return app('db')->name($tableName);
     }
 }

@@ -20,6 +20,7 @@ Max框架数据库组件
 ```shell
 composer create-project max/max
 ```
+
 ## 安装
 
 ```shell
@@ -41,13 +42,14 @@ composer require max/database
 ```php
 <?php
 
+use function Max\env;
+
 return [
 
     //默认数据库配置
     'default'  => env('database.default', 'mysql'),
-    //慢SQL日志记录时间,数字（ms，当执行时间不小于该时间时会记录日志）或者false(关闭日志) ,0 全部记录
-    'slow_log' => 5,
 
+    // mysql, pgsql, oci
     'mysql' => [
         //可以使用dsn来配置更多参数，会优先使用该参数
         'dsn'     => '',
@@ -73,51 +75,12 @@ return [
         'slave'   => []
     ],
 
-//    'pgsql' => [
-//        'dsn'     => '',
-//        //主机地址
-//        'host'    => env('database.host', 'localhost'),
-//        //数据库用户名
-//        'user'    => env('database.user', 'user'),
-//        //数据库密码
-//        'pass'    => env('database.pass', 'pass'),
-//        //数据库名
-//        'dbname'  => env('database.dbname', 'dbname'),
-//        //端口
-//        'port'    => env('database.port', 5432),
-//        //额外设置
-//        'options' => env('database.options', [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION]),
-//        //编码
-//        'charset' => env('database . charset', 'utf8'),
-//        //数据表前缀
-//        'prefix'  => ''
-//    ],
-
-//    'oci' => [
-//        'dsn'     => '',
-//        //主机地址
-//        'host'    => env('database.host', 'localhost'),
-//        //数据库用户名
-//        'user'    => env('database.user', 'user'),
-//        //数据库密码
-//        'pass'    => env('database.pass', 'pass'),
-//        //数据库名
-//        'dbname'  => env('database.dbname', 'dbname'),
-//        //端口
-//        'port'    => env('database.port', 5432),
-//        //额外设置
-//        'options' => env('database.options', [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION]),
-//        //编码
-//        'charset' => env('database . charset', 'utf8'),
-//        //数据表前缀
-//        'prefix'  => ''
-//    ]
-
 ];
+
 ```
 
 ## 方法
 
-安装完成后就可以使用`\Max\Facade\Db::name($table);`等的方式来使用Database扩展，或者使用助手函数`db($tableName)`
+安装完成后就可以使用`\Max\Facade\DB::name($table);`等的方式来使用Database扩展，或者使用助手函数`\Max\db($tableName)`
 
 > 官网：https://www.chengyao.xyz

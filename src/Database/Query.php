@@ -62,11 +62,6 @@ class Query
     protected $builder;
 
     /**
-     * true 实例将不会保存到容器中
-     * @var bool
-     */
-//     public static $__refreshable = true;
-    /**
      * 历史SQL
      * @var array
      */
@@ -383,22 +378,24 @@ class Query
             $queryString = $query;
         }
 
+        //debug 模式返回生成的SQL
         if ($this->debug) {
-            halt($queryString);
+            echo $queryString;
         }
-        $startTime          = microtime(true);
-        $this->PDOstatement = $this->PDO()->prepare($query);
-        $this->PDOstatement->execute($bindParams);
-        $duration = round((microtime(true) - $startTime) * 1000, 2);
-        $slowLog  = $this->app->config->get('database.slow_log');
-        if (false !== $slowLog && $duration >= $slowLog) {
-            $this->app['log']->debug("{$queryString}", ['Time' => $duration . 'ms', 'SQL' => $query]);
+
+        $startTime = microtime(true);
+        try {
+            $this->PDOstatement = $this->PDO()->prepare($query);
+            $this->PDOstatement->execute($bindParams);
+        } catch (\PDOException $e) {
+            $this->history['NG'][] = ['query' => $queryString, 'bind' => $bindParams, 'message' => $e->getMessage()];
+            throw $e;
         }
-        $this->history[] = [$queryString, $duration];
-        $this->builder   = new $this->builderClass;
+        $duration              = round((microtime(true) - $startTime) * 1000, 2);
+        $this->history['OK'][] = ['query' => $queryString, 'time' => $duration];
+        $this->builder         = new $this->builderClass;
         return $this->PDOstatement;
     }
-
 
     /**
      * 历史SQL取得
