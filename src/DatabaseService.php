@@ -19,14 +19,12 @@ class DatabaseService extends Service
 
 }
 
-if (false === function_exists('db')) {
-    /**
-     * DB类助手函数
-     * @param string $tableName
-     * @return Query
-     */
-    function db(string $tableName)
-    {
-        return app('db')->name($tableName);
-    }
+/**
+ * DB类助手函数
+ * @param string $tableName
+ * @return Query
+ */
+function db(string $tableName)
+{
+    return app('db')->name($tableName);
 }
