@@ -2,6 +2,7 @@
 
 namespace Max\Database;
 
+use Max\Exception\InvalidArgumentException;
 use Max\Tools\Arr;
 
 /**
@@ -123,15 +124,7 @@ class Builder
      */
     public function whereLike(array $whereLike)
     {
-        foreach ($whereLike as $field => $like) {
-            if (is_numeric($field)) {
-                $this->where .= " AND {$like}";
-            } else {
-                $this->where        .= " AND {$field} LIKE ?";
-                $this->bindParams[] = $like;
-            }
-        }
-        return $this;
+        return $this->where($whereLike, 'LIKE');
     }
 
     /**
@@ -227,6 +220,8 @@ class Builder
             } else if (2 === count($value)) {
                 $this->where .= " AND {$field} BETWEEN ? AND ?";
                 array_push($this->bindParams, ...$value);
+            } else {
+                throw new InvalidArgumentException('whereBetween参数有误');
             }
         }
         return $this;
@@ -481,7 +476,6 @@ class Builder
             $columns = ' (' . implode(',', array_keys($data)) . ')';
         }
         $values = ' VALUES (' . rtrim(str_repeat('?,', count($data)), ',') . ')';
-        //TODO PHP7.4可以使用spread运算符合并数组
         array_push($this->bindParams, ...array_values($data));
         return sprintf(static::INSERT, $this->getTable(), $columns, $values);
     }
