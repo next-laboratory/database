@@ -380,7 +380,7 @@ class Query
 
         //debug 模式返回生成的SQL
         if ($this->debug) {
-            echo $queryString;
+            exit($queryString);
         }
 
         $startTime = microtime(true);
