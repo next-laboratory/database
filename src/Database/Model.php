@@ -51,7 +51,7 @@ class Model
     {
         $this->name       = $this->name ?? strtolower(ltrim(strrchr(get_called_class(), '\\'), '\\'));
         $this->collection = new \stdClass();
-        $this->query      = app('db');
+        $this->query      = \Max\app('db');
         method_exists($this, 'init') && invoke([$this, 'init']);
     }
 
