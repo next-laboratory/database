@@ -294,6 +294,7 @@ class Builder
     protected function withJoin(string $table, string $on = '', string $method = 'INNER')
     {
         $this->join .= " {$method} JOIN {$table}" . (('' == $on) ? '' : ' ON ' . $on);
+        return $this;
     }
 
     /**
@@ -304,8 +305,7 @@ class Builder
      */
     public function join(string $table, string $on = '')
     {
-        $this->withJoin($table, $on, 'INNER');
-        return $this;
+        return $this->withJoin($table, $on);
     }
 
     /**
@@ -314,10 +314,9 @@ class Builder
      * @return $this
      * @throws \Exception
      */
-    public function leftJoin(string $table)
+    public function leftJoin(string $table, string $on)
     {
-        $this->withJoin($table, $on, 'LEFT OUTER');
-        return $this;
+        return $this->withJoin($table, $on, 'LEFT OUTER');
     }
 
     /**
@@ -328,8 +327,7 @@ class Builder
      */
     public function rightJoin(string $table, string $on)
     {
-        $this->withJoin($table, $on, 'RIGHT OUTER');
-        return $this;
+        return $this->withJoin($table, $on, 'RIGHT OUTER');
     }
 
     /**
@@ -402,7 +400,15 @@ class Builder
         if (isset($field)) {
             $this->fields = $field;
         }
-        return sprintf(static::SELECT, $this->getFields(), $this->getTable(), $this->join, $this->getWhere(), $this->getGroup(), $this->getOrder(), $this->limit);
+        return sprintf(static::SELECT,
+            $this->getFields(),
+            $this->getTable(),
+            $this->join,
+            $this->getWhere(),
+            $this->getGroup(),
+            $this->getOrder(),
+            $this->limit
+        );
     }
 
     /**
@@ -413,7 +419,10 @@ class Builder
      */
     public function delete(): string
     {
-        return sprintf(static::DELETE, $this->getTable(), $this->getWhere());
+        return sprintf(static::DELETE,
+            $this->getTable(),
+            $this->getWhere()
+        );
     }
 
     /**
@@ -430,7 +439,11 @@ class Builder
         }
         $set = substr($set, 0, -3);
         array_unshift($this->bindParams, ...array_values($data));
-        return sprintf(static::UPDATE, $this->getTable(), $set, $this->getWhere());
+        return sprintf(static::UPDATE,
+            $this->getTable(),
+            $set,
+            $this->getWhere()
+        );
     }
 
     /**
@@ -448,7 +461,11 @@ class Builder
         }
         $values = ' VALUES (' . rtrim(str_repeat('?,', count($data)), ',') . ')';
         array_push($this->bindParams, ...array_values($data));
-        return sprintf(static::INSERT, $this->getTable(), $columns, $values);
+        return sprintf(static::INSERT,
+            $this->getTable(),
+            $columns,
+            $values
+        );
     }
 
 }
