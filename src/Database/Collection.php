@@ -5,6 +5,8 @@ namespace Max\Database;
 
 use ArrayAccess;
 use JsonSerializable;
+use IteratorAggregate;
+use ArrayIterator;
 use Countable;
 
 /**
@@ -12,7 +14,11 @@ use Countable;
  * Class Collection
  * @package Max
  */
-class Collection implements ArrayAccess, JsonSerializable, Countable, \IteratorAggregate
+class Collection implements
+    ArrayAccess,
+    JsonSerializable,
+    Countable,
+    IteratorAggregate
 {
 
     /**
@@ -140,6 +146,6 @@ class Collection implements ArrayAccess, JsonSerializable, Countable, \IteratorA
 
     public function getIterator()
     {
-        return new \ArrayIterator($this->items);
+        return new ArrayIterator($this->items);
     }
 }

@@ -132,15 +132,9 @@ class Builder
      * @param string|array $whereNull
      * @return $this
      */
-    public function whereNull($whereNull)
+    public function whereNull(string $nullField)
     {
-        if (is_array($whereNull)) {
-            foreach ($whereNull as $field) {
-                $this->where .= " AND {$field} IS NULL";
-            }
-        } else {
-            $this->where .= " AND {$whereNull} IS NULL";
-        }
+        $this->where .= " AND {$nullField} IS NULL";
         return $this;
     }
 
@@ -149,15 +143,9 @@ class Builder
      * @param array|string $whereNotNull
      * @return $this
      */
-    public function whereNotNull($whereNotNull)
+    public function whereNotNull(string $notNullField)
     {
-        if (is_array($whereNotNull)) {
-            foreach ($whereNotNull as $field) {
-                $this->where .= " AND {$field} IS NOT NULL";
-            }
-        } else {
-            $this->where .= " AND {$whereNotNull} IS NOT NULL";
-        }
+        $this->where .= " AND {$notNullField} IS NOT NULL";
         return $this;
     }
 
@@ -264,13 +252,9 @@ class Builder
      * @param string $table
      * @return $this
      */
-    public function name(string $table, string $alias = '')
+    public function name(string $table, string $alias = null)
     {
-        if ('' !== $alias) {
-            $alias = " AS {$alias}";
-        }
-        $this->table = "{$this->prefix}{$table}{$alias}";
-        return $this;
+        return $this->table($this->prefix . $table, $alias);
     }
 
     /**
@@ -278,7 +262,7 @@ class Builder
      * @param string $table
      * @return $this
      */
-    public function table(string $table, string $alias = '')
+    public function table(string $table, string $alias = null)
     {
         if ('' !== $alias) {
             $alias = " AS {$alias}";
@@ -293,11 +277,9 @@ class Builder
      * 传入数组形式的排序字段，例如['id' => 'desc','name' => 'asc']
      * @return $this
      */
-    public function order(array $order)
+    public function order(string $order, $sort = 'ASC')
     {
-        foreach ($order as $ord => $by) {
-            $this->order .= ", {$ord} {$by}";
-        }
+        $this->order .= ", {$order} {$sort}";
         return $this;
     }
 
@@ -309,14 +291,9 @@ class Builder
         return $this->order;
     }
 
-    protected function leagueTableMethod($joinTables, $method = 'INNER')
+    protected function withJoin(string $table, string $on = '', string $method = 'INNER')
     {
-        foreach (Arr::getAssoc($joinTables) as $joinTable => $on) {
-            if ('INNER' !== $method && null === $on) {
-                throw new \Exception("{$method} 联表必须有限定条件！");
-            }
-            $this->join .= " {$method} JOIN {$joinTable}" . (is_null($on) ? '' : ' ON ' . $on);
-        }
+        $this->join .= " {$method} JOIN {$table}" . (('' == $on) ? '' : ' ON ' . $on);
     }
 
     /**
@@ -325,9 +302,9 @@ class Builder
      * @return $this
      * @throws \Exception
      */
-    public function join(array $joinTables)
+    public function join(string $table, string $on = '')
     {
-        $this->leagueTableMethod($joinTables);
+        $this->withJoin($table, $on, 'INNER');
         return $this;
     }
 
@@ -337,9 +314,9 @@ class Builder
      * @return $this
      * @throws \Exception
      */
-    public function leftJoin(array $joinTables)
+    public function leftJoin(string $table)
     {
-        $this->leagueTableMethod($joinTables, 'LEFT OUTER');
+        $this->withJoin($table, $on, 'LEFT OUTER');
         return $this;
     }
 
@@ -349,9 +326,9 @@ class Builder
      * @return $this
      * @throws \Exception
      */
-    public function rightJoin(array $joinTables)
+    public function rightJoin(string $table, string $on)
     {
-        $this->leagueTableMethod($joinTables, 'RIGHT OUTER');
+        $this->withJoin($table, $on, 'RIGHT OUTER');
         return $this;
     }
 
@@ -380,16 +357,10 @@ class Builder
      * @param array $group
      * @return $this
      */
-    public function group(array $group)
+    public function group(string $groupBy, string $having = '')
     {
-        foreach ($group as $groupBy => $having) {
-            if (is_numeric($groupBy)) {
-                $this->group .= "{$having}, ";
-            } else {
-                $this->group  .= $groupBy . ', ';
-                $this->having .= " AND {$having}";
-            }
-        }
+        $this->group  .= ',' . $groupBy;
+        $this->having .= ' AND ' . $having;
         return $this;
     }
 
@@ -400,12 +371,12 @@ class Builder
     protected function getGroup(): string
     {
         if ('' !== $this->group) {
-            $this->group = ' GROUP BY ' . trim($this->group, ', ');
+            $this->group = ' GROUP BY ' . substr($this->group, 1);
             if ('' !== $this->having) {
-                $this->group .= ' HAVING' . substr($this->having, 4);
+                $this->having = ' HAVING ' . substr($this->having, 4);
             }
         }
-        return $this->group;
+        return $this->group . $this->having;
     }
 
     /**
@@ -472,7 +443,7 @@ class Builder
     {
         $this->bindParams = [];
         $columns          = '';
-        if (Arr::isAssoc($data)) {
+        if (array_keys($data) !== range(0, count($data) - 1)) {
             $columns = ' (' . implode(',', array_keys($data)) . ')';
         }
         $values = ' VALUES (' . rtrim(str_repeat('?,', count($data)), ',') . ')';

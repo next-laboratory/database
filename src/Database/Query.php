@@ -19,11 +19,11 @@ use Max\App;
  * @method $this whereBetween(array $whereBetween)
  * @method $this whereExists(array $whereExists)
  * @method $this order(array $order)
- * @method $this join(array $joinTables)
- * @method $this leftJoin(array $joinTables)
- * @method $this rightJoin(array $joinTables)
+ * @method $this join(string $table, string $on = 'INNER')
+ * @method $this leftJoin(string $table, string $on)
+ * @method $this rightJoin(string $table, string $on)
  * @method $this fields($fields)
- * @method $this group(array $group)
+ * @method $this group(string $groupBy, $having = '')
  * @method $this limit(int $limit, int $offset = null)
  * Class Db
  * @package Max
