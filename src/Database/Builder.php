@@ -3,7 +3,6 @@
 namespace Max\Database;
 
 use Max\Exception\InvalidArgumentException;
-use Max\Helper\Arr;
 
 /**
  * Class Builder

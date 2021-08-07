@@ -20,13 +20,7 @@ class Mysql extends Builder
 
     public function table(string $table, string $alias = null)
     {
-        return parent::table($this->quote($table), $this->quote($alias));
+        return parent::table($this->quote($table), $alias ? $this->quote($alias) : $alias);
     }
-
-    protected function withJoin(string $table, string $on = '', string $method = 'INNER')
-    {
-        parent::withJoin($this->quote($table), $on, $method);
-    }
-
 
 }

@@ -389,7 +389,8 @@ class Query
             $this->PDOstatement->execute($bindParams);
         } catch (\PDOException $e) {
             $this->history['NG'][] = ['query' => $queryString, 'bind' => $bindParams, 'message' => $e->getMessage()];
-            throw $e;
+            $exception             = get_class($e);
+            throw new $exception($e->getMessage() . "(SQL: $queryString)");
         }
         $duration              = round((microtime(true) - $startTime) * 1000, 2);
         $this->history['OK'][] = ['query' => $queryString, 'time' => $duration];
