@@ -263,7 +263,7 @@ class Builder
      */
     public function table(string $table, string $alias = null)
     {
-        if ('' !== $alias) {
+        if (isset($alias)) {
             $alias = " AS {$alias}";
         }
         $this->table = "{$table}{$alias}";
@@ -290,21 +290,16 @@ class Builder
         return $this->order;
     }
 
-    protected function withJoin(string $table, string $on = '', string $method = 'INNER')
-    {
-        $this->join .= " {$method} JOIN {$table}" . (('' == $on) ? '' : ' ON ' . $on);
-        return $this;
-    }
-
     /**
      * 内联
      * @param array $joinTables
      * @return $this
      * @throws \Exception
      */
-    public function join(string $table, string $on = '')
+    public function join(string $table, string $on = '', string $type = 'INNER')
     {
-        return $this->withJoin($table, $on);
+        $this->join .= " {$type} JOIN {$table}" . (('' == $on) ? '' : ' ON ' . $on);
+        return $this;
     }
 
     /**
@@ -315,7 +310,7 @@ class Builder
      */
     public function leftJoin(string $table, string $on)
     {
-        return $this->withJoin($table, $on, 'LEFT OUTER');
+        return $this->join($table, $on, 'LEFT OUTER');
     }
 
     /**
@@ -326,7 +321,12 @@ class Builder
      */
     public function rightJoin(string $table, string $on)
     {
-        return $this->withJoin($table, $on, 'RIGHT OUTER');
+        return $this->join($table, $on, 'RIGHT OUTER');
+    }
+
+    public function crossJoin(string $table)
+    {
+        return $this->join($table, '', 'CROSS');
     }
 
     /**
