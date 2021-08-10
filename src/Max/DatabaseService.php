@@ -10,7 +10,7 @@ class DatabaseService extends Service
 
     public function register()
     {
-        $this->app->bind('db', \Max\Database\Query::class);
+        $this->app->alias('db', \Max\Database\Query::class);
     }
 
     public function boot()

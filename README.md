@@ -42,8 +42,6 @@ composer require max/database
 ```php
 <?php
 
-use function Max\env;
-
 return [
 
     //默认数据库配置

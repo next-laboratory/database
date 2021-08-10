@@ -103,9 +103,9 @@ class Query
      * @param string $type
      * @return mixed
      */
-    public function PDO(string $type = 'read')
+    public function PDO(bool $isRead = true)
     {
-        return $this->app->make(Connector::class)->handle($type);
+        return $this->app->make(Connector::class)->handle($isRead);
     }
 
     /**
@@ -148,9 +148,9 @@ class Query
      * 查询
      * @return Collection
      */
-    public function select(): Collection
+    public function select($field = null): Collection
     {
-        $query      = $this->builder->select();
+        $query      = $this->builder->select($field);
         $bindParams = $this->builder->getBindParams();
         return new Collection(function (Collection $collection) use ($query, $bindParams) {
             return $this->fetchAll($query, $bindParams, \PDO::FETCH_ASSOC);
@@ -199,7 +199,7 @@ class Query
      */
     public function fetchAll(string $query, array $binds = [], int $fetchType = \PDO::FETCH_COLUMN)
     {
-        return $this->execute($query, $binds)->fetchAll($fetchType);
+        return $this->execute($query, $binds, true)->fetchAll($fetchType);
     }
 
     /**
@@ -211,7 +211,7 @@ class Query
      */
     public function count($field = '*'): int
     {
-        return (int)$this->fetch($this->builder->select("COUNT(${field})"), $this->builder->getBindParams());
+        return $this->aggregate("COUNT({$field})");
     }
 
     /**
@@ -222,7 +222,7 @@ class Query
      */
     public function sum($field): int
     {
-        return (int)$this->fetch($this->builder->select("SUM({$field})"), $this->builder->getBindParams());
+        return $this->aggregate("SUM($field)");
     }
 
     /**
@@ -233,7 +233,7 @@ class Query
      */
     public function max($field): int
     {
-        return (int)$this->fetch($this->builder->select("MAX({$field})"), $this->builder->getBindParams());
+        return $this->aggregate("MAX({$field})");
     }
 
     /**
@@ -244,7 +244,7 @@ class Query
      */
     public function min($field): int
     {
-        return (int)$this->fetch($this->builder->select("MIN({$field})"), $this->builder->getBindParams());
+        return $this->aggregate("MIN({$field})");
     }
 
     /**
@@ -255,7 +255,12 @@ class Query
      */
     public function avg($field): int
     {
-        return (int)$this->fetch($this->builder->select("AVG({$field})"), $this->builder->getBindParams());
+        return $this->aggregate("AVG({$field})");
+    }
+
+    public function aggregate($expression): int
+    {
+        return (int)$this->fetch($this->builder->select($expression), $this->builder->getBindParams());
     }
 
     /**
@@ -368,7 +373,7 @@ class Query
      * @param array $data
      * @return \PDOStatement
      */
-    protected function execute(string $query, array $bindParams = null): \PDOStatement
+    protected function execute(string $query, array $bindParams = null, bool $isRead = true): \PDOStatement
     {
         $bindParams = $bindParams ?? $this->builder->getBindParams();
         try {
@@ -386,16 +391,14 @@ class Query
 
         $startTime = microtime(true);
         try {
-            $this->PDOstatement = $this->PDO()->prepare($query);
+            $this->PDOstatement = $this->PDO($isRead)->prepare($query);
             $this->PDOstatement->execute($bindParams);
         } catch (\PDOException $e) {
-            $this->history['NG'][] = ['query' => $queryString, 'bind' => $bindParams, 'message' => $e->getMessage()];
-            $exception             = get_class($e);
-            throw new $exception($e->getMessage() . "(SQL: $queryString)");
+            throw new \PDOException($e->getMessage() . "(SQL: $queryString)");
         }
-        $duration              = round((microtime(true) - $startTime) * 1000, 2);
-        $this->history['OK'][] = ['query' => $queryString, 'time' => $duration];
-        $this->builder         = new $this->builderClass;
+        $duration        = round((microtime(true) - $startTime) * 1000, 2);
+        $this->history[] = ['query' => $queryString, 'time' => $duration];
+        $this->builder   = new $this->builderClass;
         return $this->PDOstatement;
     }
 

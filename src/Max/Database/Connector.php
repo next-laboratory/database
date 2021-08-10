@@ -13,10 +13,20 @@ class Connector
     protected $pdo;
 
     /**
+     * 连接池
+     * @var array
+     */
+    protected $connectionPool = [];
+
+    /**
      * @var mixed|string|null
      */
     protected $database = null;
 
+    /**
+     * Connector constructor.
+     * @param App $app
+     */
     public function __construct(App $app)
     {
         $config         = $app->config->get('database');
@@ -27,6 +37,10 @@ class Connector
         $this->connect($dsn, $config);
     }
 
+    /**
+     * @param array $config
+     * @return mixed|string
+     */
     public function dsn(array $config)
     {
         if (!isset($config['dsn']) || empty($dsn = $config['dsn'])) {
@@ -58,7 +72,7 @@ class Connector
      * PDO实例
      * @return mixed
      */
-    public function handle($type = null)
+    public function handle(bool $isRead = true)
     {
         return $this->pdo;
     }
