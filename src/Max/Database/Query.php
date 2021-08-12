@@ -45,12 +45,6 @@ class Query
     protected $database = '';
 
     /**
-     * true可以打印SQL和绑定的变量
-     * @var bool
-     */
-    protected $debug = false;
-
-    /**
      * 历史记录
      * @var History
      */
@@ -69,10 +63,10 @@ class Query
     protected $builder;
 
     /**
-     * 数据库驱动
+     * 驱动基础命名空间
      * @var string
      */
-    const NAMESPACE = '\\Max\\Database\\Builder\\';
+    protected const NAMESPACE = '\\Max\\Database\\Builder\\';
 
     /**
      * 初始化实例列表和配置
@@ -87,16 +81,6 @@ class Query
         $this->builderClass = static::NAMESPACE . ucfirst($this->database);
         $this->builder      = new $this->builderClass;
         $this->history      = new History();
-    }
-
-    /**
-     * 测试当前查询
-     * @return $this
-     */
-    public function getSQL(): Query
-    {
-        $this->debug = true;
-        return $this;
     }
 
     /**
@@ -151,11 +135,14 @@ class Query
      */
     public function select($field = null): Collection
     {
-        $query      = $this->builder->select($field);
-        $bindParams = $this->builder->getBindParams();
-        return new Collection(function (Collection $collection) use ($query, $bindParams) {
-            return $this->fetchAll($query, $bindParams, \PDO::FETCH_ASSOC);
-        }, $query, $bindParams);
+        return new Collection(
+            $this->fetchAll(
+                $this->builder->select($field),
+                $this->builder->getBindParams(),
+                \PDO::FETCH_ASSOC
+            ),
+            $this->history->end()
+        );
     }
 
     /**
@@ -377,11 +364,7 @@ class Query
     protected function execute(string $query, array $bindParams = null, bool $isRead = true): \PDOStatement
     {
         $bindParams = $bindParams ?? $this->builder->getBindParams();
-        //debug 模式返回生成的SQL
-        if ($this->debug) {
-            return compact(['query', 'bindParams']);
-        }
-        $startTime = microtime(true);
+        $startTime  = microtime(true);
         try {
             $this->PDOstatement = $this->PDO($isRead)->prepare($query);
             $this->PDOstatement->execute($bindParams);

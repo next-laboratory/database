@@ -14,24 +14,14 @@ use Countable;
  * Class Collection
  * @package Max
  */
-class Collection implements
-    ArrayAccess,
-    JsonSerializable,
-    Countable,
-    IteratorAggregate
+class Collection implements ArrayAccess, JsonSerializable, Countable, IteratorAggregate
 {
 
     /**
-     * SQL
-     * @var string
-     */
-    protected $query = '';
-
-    /**
-     * 绑定的参数
+     * 查询记录
      * @var array
      */
-    protected $bindParams = [];
+    protected $query = [];
 
     /**
      * 查询的数据
@@ -39,14 +29,23 @@ class Collection implements
      */
     protected $items = [];
 
-    public function __construct(\Closure $closure, string $query = '', array $bindParams = [])
+    /**
+     * Collection constructor.
+     * @param $items
+     * @param $query
+     */
+    public function __construct($items, $query)
     {
-        $this->query      = $query;
-        $this->bindParams = $bindParams;
-        $this->items      = $closure($this);
+        $this->query = $query;
+        $this->items = $items;
         return $this;
     }
 
+    /**
+     * @param bool $throw
+     * @return $this
+     * @throws \Exception
+     */
     public function throwWhenEmpty(bool $throw = false)
     {
         if (true == $throw && $this->isEmpty()) {
@@ -55,12 +54,7 @@ class Collection implements
         return $this;
     }
 
-    public function getBindParams()
-    {
-        return $this->bindParams;
-    }
-
-    public function getSQL()
+    public function getQuery()
     {
         return $this->query;
     }
@@ -97,10 +91,6 @@ class Collection implements
         return $this->items;
     }
 
-    /**
-     * @param mixed $offset
-     * @return bool
-     */
     public function offsetExists($offset)
     {
         return isset($this->items[$offset]);
@@ -125,10 +115,6 @@ class Collection implements
         return false;
     }
 
-    /**
-     * 可以直接json_encode
-     * @return mixed
-     */
     public function jsonSerialize()
     {
         return $this->items;

@@ -1,15 +1,14 @@
 <?php
 
-
 namespace Max\Database;
-
 
 class History implements \IteratorAggregate
 {
+
     /**
      * @var array
      */
-    protected $item = [];
+    protected $items = [];
 
     /**
      * 记录历史
@@ -17,13 +16,19 @@ class History implements \IteratorAggregate
      * @param $time
      * @param $binds
      */
-    public function record($query, $time, $bindParams)
+    public function record($query, $time, $boundParameters)
     {
-        $this->item[] = compact(['query', 'time', 'bindParams']);
+        $this->items[] = compact(['query', 'time', 'boundParameters']);
     }
 
     public function getIterator()
     {
-        return new \ArrayIterator($this->item);
+        return new \ArrayIterator($this->items);
     }
+
+    public function end()
+    {
+        return end($this->items);
+    }
+
 }
