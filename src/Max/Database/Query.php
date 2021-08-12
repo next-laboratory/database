@@ -51,6 +51,12 @@ class Query
     protected $debug = false;
 
     /**
+     * 历史记录
+     * @var History
+     */
+    protected $history;
+
+    /**
      * SQL构造器类名
      * @var string
      */
@@ -61,12 +67,6 @@ class Query
      * @var Builder
      */
     protected $builder;
-
-    /**
-     * 历史SQL
-     * @var array
-     */
-    protected $history = [];
 
     /**
      * 数据库驱动
@@ -86,6 +86,7 @@ class Query
         $this->database     = $app->config->get('database.default');
         $this->builderClass = static::NAMESPACE . ucfirst($this->database);
         $this->builder      = new $this->builderClass;
+        $this->history      = new History();
     }
 
     /**
@@ -387,9 +388,9 @@ class Query
         } catch (\PDOException $e) {
             throw new \PDOException($e->getMessage() . "(SQL: $query)");
         }
-        $time            = round((microtime(true) - $startTime) * 1000, 4);
-        $this->history[] = compact('query', 'time', 'bindParams');
-        $this->builder   = new $this->builderClass;
+        $time = round((microtime(true) - $startTime) * 1000, 4);
+        $this->history->record($query, $time, $bindParams);
+        $this->builder = new $this->builderClass;
         return $this->PDOstatement;
     }
 
@@ -397,7 +398,7 @@ class Query
      * 历史SQL取得
      * @return array
      */
-    public function getHistory(): array
+    public function getHistory(): \IteratorAggregate
     {
         return $this->history;
     }
