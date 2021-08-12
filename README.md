@@ -31,7 +31,7 @@ composer require max/database
 
 ## 注册服务提供者
 
-在`/config/app.php` 的`provider`下注册服务提供者类`\Max\DatabaseService::class`
+在`/config/http.php` 或者`/config/console.php`中的`provider`下注册服务提供者类`\Max\DatabaseService::class`
 
 ## 配置文件
 
