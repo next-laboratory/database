@@ -376,28 +376,19 @@ class Query
     protected function execute(string $query, array $bindParams = null, bool $isRead = true): \PDOStatement
     {
         $bindParams = $bindParams ?? $this->builder->getBindParams();
-        try {
-            $queryString = sprintf(str_replace('?', '%s', $query), ...array_map(function ($value) {
-                return is_string($value) ? "'{$value}'" : (string)$value;
-            }, $bindParams));
-        } catch (\Exception $e) {
-            $queryString = $query;
-        }
-
         //debug 模式返回生成的SQL
         if ($this->debug) {
-            exit($queryString);
+            return compact(['query', 'bindParams']);
         }
-
         $startTime = microtime(true);
         try {
             $this->PDOstatement = $this->PDO($isRead)->prepare($query);
             $this->PDOstatement->execute($bindParams);
         } catch (\PDOException $e) {
-            throw new \PDOException($e->getMessage() . "(SQL: $queryString)");
+            throw new \PDOException($e->getMessage() . "(SQL: $query)");
         }
-        $duration        = round((microtime(true) - $startTime) * 1000, 2);
-        $this->history[] = ['query' => $queryString, 'time' => $duration];
+        $time            = round((microtime(true) - $startTime) * 1000, 4);
+        $this->history[] = compact('query', 'time', 'bindParams');
         $this->builder   = new $this->builderClass;
         return $this->PDOstatement;
     }
