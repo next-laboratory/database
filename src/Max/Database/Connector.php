@@ -1,8 +1,9 @@
 <?php
-declare(strict_types=1);
+declare (strict_types = 1);
 
 namespace Max\Database;
 
+use Exception;
 use Max\App;
 
 class Connector
@@ -29,10 +30,13 @@ class Connector
      */
     public function __construct(App $app)
     {
-        $config         = $app->config->get('database');
-        $this->database = $config['default'] ?? 'mysql';
-        $config         = $config[$this->database];
-        $dsn            = $this->dsn($config);
+        $config = $app->config->get('database');
+        $this->database = $config['default'];
+        if (!isset($config[$this->database])) {
+            throw new Exception('没有找到' . $this->database . '相关的配置');
+        }
+        $config = $config[$this->database];
+        $dsn = $this->dsn($config);
         //TODO 优化
         $this->connect($dsn, $config);
     }
