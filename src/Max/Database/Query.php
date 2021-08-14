@@ -18,7 +18,7 @@ use Max\App;
  * @method $this whereNotIn($whereNotIn)
  * @method $this whereBetween(array $whereBetween)
  * @method $this whereExists(array $whereExists)
- * @method $this order(array $order)
+ * @method $this order(string $field, $sort = 'ASC')
  * @method $this join(string $table, string $on = '', string $type = 'INNER')
  * @method $this leftJoin(string $table, string $on)
  * @method $this rightJoin(string $table, string $on)
@@ -192,8 +192,7 @@ class Query
 
     /**
      * 查询总数
-     * @param int|string $field
-     * count的字段
+     * @param string $field
      * @return int
      * @throws \Exception
      */
@@ -246,6 +245,11 @@ class Query
         return $this->aggregate("AVG({$field})");
     }
 
+    /**
+     * @param $expression
+     * @return int
+     * @throws \Exception
+     */
     public function aggregate($expression): int
     {
         return (int)$this->fetch($this->builder->select($expression), $this->builder->getBindParams());

@@ -356,8 +356,10 @@ class Builder
      */
     public function group(string $groupBy, string $having = '')
     {
-        $this->group  .= ',' . $groupBy;
-        $this->having .= ' AND ' . $having;
+        $this->group .= ', ' . $groupBy;
+        if ('' !== $having) {
+            $this->having .= ' AND ' . $having;
+        }
         return $this;
     }
 
@@ -368,9 +370,9 @@ class Builder
     protected function getGroup(): string
     {
         if ('' !== $this->group) {
-            $this->group = ' GROUP BY ' . substr($this->group, 1);
+            $this->group = ' GROUP BY' . substr($this->group, 1);
             if ('' !== $this->having) {
-                $this->having = ' HAVING ' . substr($this->having, 4);
+                $this->having = ' HAVING' . substr($this->having, 4);
             }
         }
         return $this->group . $this->having;
