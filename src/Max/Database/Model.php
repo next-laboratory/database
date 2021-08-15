@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Max\Database;
 
+use Max\App;
 use Max\Facade\Db;
 
 /**
@@ -47,12 +48,10 @@ class Model
      * 初始化表名
      * Model constructor.
      */
-    final public function __construct()
+    public function __construct()
     {
         $this->name       = $this->name ?? strtolower(ltrim(strrchr(get_called_class(), '\\'), '\\'));
         $this->collection = new \stdClass();
-        $this->query      = app('db');
-        method_exists($this, 'init') && invoke([$this, 'init']);
     }
 
     public function beforeSave()
@@ -191,5 +190,12 @@ class Model
     public function __set($field, $value)
     {
         $this->collection->{$field} = $value;
+    }
+
+    final public static function __setter(App $app)
+    {
+        $model        = new static($app);
+        $model->query = $app->db;
+        return $model;
     }
 }
