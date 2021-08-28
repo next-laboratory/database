@@ -260,11 +260,11 @@ class Query
      */
     public function get(): Collection
     {
-        $query      = $this->builder->select();
-        $bindParams = $this->builder->getBindParams();
-        return new Collection(function (Collection $collection) use ($query, $bindParams) {
-            return $this->fetch($query, $bindParams, \PDO::FETCH_ASSOC);
-        }, $query, $bindParams);
+        $items = $this->fetch(
+            $this->builder->select(),
+            $this->builder->getBindParams(),
+            \PDO::FETCH_ASSOC);
+        return new Collection($items, $this->history->end());
     }
 
     /**

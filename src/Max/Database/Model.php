@@ -14,7 +14,7 @@ use Max\Facade\Db;
  * @method Driver whereNotNull(array $whereNotNull);
  * @method Driver limit(int $limit, int $offset);
  * @method insert(array $data);
- * @method Driver field(string|array $fields)
+ * @method Driver field(string|array $fields);
  * Class Model
  * @package Max
  */
@@ -85,7 +85,6 @@ class Model
 
     public function afterSave()
     {
-
     }
 
     public function beforeDelete()
@@ -94,7 +93,6 @@ class Model
 
     public function afterDelete()
     {
-
     }
 
     public function beforeUpdate()
@@ -103,17 +101,14 @@ class Model
 
     public function afterUpdate()
     {
-
     }
 
     public function beforeSelect()
     {
-
     }
 
     public function afterSelect()
     {
-
     }
 
     public function save(array $data = [])

@@ -64,6 +64,11 @@ class Collection implements ArrayAccess, JsonSerializable, Countable, IteratorAg
         return count($this->items);
     }
 
+    public function each(\Closure $traverse)
+    {
+        return array_map($traverse, $this->items);
+    }
+
     /**
      * 判断数据集是否为空
      * @return bool
