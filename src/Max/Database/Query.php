@@ -63,6 +63,12 @@ class Query
     protected $builder;
 
     /**
+     * 监听函数
+     * @var \Closure
+     */
+    protected $listener;
+
+    /**
      * 驱动基础命名空间
      * @var string
      */
@@ -140,8 +146,7 @@ class Query
                 $this->builder->select($field),
                 $this->builder->getBindParams(),
                 \PDO::FETCH_ASSOC
-            ),
-            $this->history->end()
+            )
         );
     }
 
@@ -260,11 +265,13 @@ class Query
      */
     public function get(): Collection
     {
-        $items = $this->fetch(
-            $this->builder->select(),
-            $this->builder->getBindParams(),
-            \PDO::FETCH_ASSOC);
-        return new Collection($items, $this->history->end());
+        return new Collection(
+            $this->fetch(
+                $this->builder->select(),
+                $this->builder->getBindParams(),
+                \PDO::FETCH_ASSOC
+            )
+        );
     }
 
     /**
@@ -374,9 +381,11 @@ class Query
             $this->PDOstatement->execute($bindParams);
         } catch (\PDOException $e) {
             throw new \PDOException($e->getMessage() . "(SQL: $query)");
+        } finally {
+            $this->trigger($query, $bindParams);
         }
         $time = round((microtime(true) - $startTime) * 1000, 4);
-        $this->history->record($query, $time, $bindParams);
+        $this->history->add(['query' => $query, 'time' => $time, 'bindParams' => $bindParams]);
         $this->builder = new $this->builderClass;
         return $this->PDOstatement;
     }
@@ -388,6 +397,18 @@ class Query
     public function getHistory(): \IteratorAggregate
     {
         return $this->history;
+    }
+
+    public function listen(\Closure $handle)
+    {
+        $this->listener = $handle;
+    }
+
+    public function trigger(...$arguments)
+    {
+        if (!is_null($this->listener)) {
+            return ($this->listener)(...$arguments);
+        }
     }
 
 }
