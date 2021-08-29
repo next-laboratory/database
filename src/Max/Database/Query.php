@@ -385,7 +385,7 @@ class Query
             $this->trigger($query, $bindParams);
         }
         $time = round((microtime(true) - $startTime) * 1000, 4);
-        $this->history->add(['query' => $query, 'time' => $time, 'bindParams' => $bindParams]);
+        $this->history->push(['query' => $query, 'time' => $time, 'bindParams' => $bindParams]);
         $this->builder = new $this->builderClass;
         return $this->PDOstatement;
     }
