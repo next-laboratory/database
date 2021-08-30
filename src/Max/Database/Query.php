@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 namespace Max\Database;
 
-use Max\App;
-
 /**
  * 数据库外部接口
  * @method $this name(string $table_name, string $alias = '') 表名设置方法, 不带前缀
@@ -31,12 +29,6 @@ use Max\App;
  */
 class Query
 {
-
-    /**
-     * 容器实例
-     * @var App
-     */
-    protected $app;
 
     /**
      * 数据库类型
@@ -69,34 +61,38 @@ class Query
     protected $listener;
 
     /**
+     * @var Connector
+     */
+    protected $connector;
+
+    /**
      * 驱动基础命名空间
      * @var string
      */
     protected const NAMESPACE = '\\Max\\Database\\Builder\\';
 
     /**
-     * 初始化实例列表和配置
      * Query constructor.
-     * @param App $app
+     * @param array $config
      * @throws \Exception
      */
-    public function __construct(App $app)
+    public function __construct(array $config)
     {
-        $this->app          = $app;
-        $this->database     = $app->config->get('database.default');
-        $this->builderClass = static::NAMESPACE . ucfirst($this->database);
+        $this->builderClass = static::NAMESPACE . ucfirst($config['default']);
         $this->builder      = new $this->builderClass;
         $this->history      = new History();
+        $this->connector    = new Connector($config);
     }
 
-    /**
-     * PDO实例
-     * @param string $type
-     * @return mixed
-     */
-    public function PDO(bool $isRead = true)
+    public static function __setter(\Max\App $app)
     {
-        return $this->app->make(Connector::class)->handle($isRead);
+        $query = new static($app->config->get('database'));
+        return $query;
+    }
+
+    public function connection(bool $isRead = true)
+    {
+        return $this->connector->handle($isRead);
     }
 
     /**
@@ -293,7 +289,7 @@ class Query
     public function insert(array $data): string
     {
         $this->execute($this->builder->insert($data));
-        return $this->PDO()->lastinsertid();
+        return $this->connection()->lastinsertid();
     }
 
     /**
@@ -312,7 +308,7 @@ class Query
     public function begin()
     {
         $this->autoCommit(false);
-        $this->PDO()->beginTransaction();
+        $this->connection()->beginTransaction();
     }
 
     /**
@@ -320,7 +316,7 @@ class Query
      */
     public function commit()
     {
-        $this->PDO()->commit();
+        $this->connection()->commit();
         $this->autoCommit();
     }
 
@@ -330,7 +326,7 @@ class Query
      */
     public function autoCommit(bool $autoCommit = true)
     {
-        $this->PDO()->setAttribute(\PDO::ATTR_AUTOCOMMIT, $autoCommit);
+        $this->connection()->setAttribute(\PDO::ATTR_AUTOCOMMIT, $autoCommit);
     }
 
     /***
@@ -338,7 +334,7 @@ class Query
      */
     public function rollback()
     {
-        $this->PDO()->rollBack();
+        $this->connection()->rollBack();
         $this->autoCommit();
     }
 
@@ -351,7 +347,7 @@ class Query
      */
     public function transaction(\Closure $transaction)
     {
-        $pdo = $this->PDO();
+        $pdo = $this->connection();
         $pdo->setAttribute(\PDO::ATTR_AUTOCOMMIT, 0);
         try {
             $pdo->beginTransaction();
@@ -377,7 +373,7 @@ class Query
         $bindParams = $bindParams ?? $this->builder->getBindParams();
         $startTime  = microtime(true);
         try {
-            $this->PDOstatement = $this->PDO($isRead)->prepare($query);
+            $this->PDOstatement = $this->connection($isRead)->prepare($query);
             $this->PDOstatement->execute($bindParams);
         } catch (\PDOException $e) {
             throw new \PDOException($e->getMessage() . "(SQL: $query)");
