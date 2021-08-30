@@ -31,12 +31,6 @@ class Query
 {
 
     /**
-     * 数据库类型
-     * @var string
-     */
-    protected $database = '';
-
-    /**
      * 历史记录
      * @var History
      */
@@ -86,8 +80,7 @@ class Query
 
     public static function __setter(\Max\App $app)
     {
-        $query = new static($app->config->get('database'));
-        return $query;
+        return new static($app->config->get('database'));
     }
 
     public function connection(bool $isRead = true)
