@@ -29,7 +29,7 @@ namespace {
      */
     function db(string $tableName = null)
     {
-        return is_null($tableName) ? app('db') : app('db')->name($tableName);
+        return is_null($tableName) ? make('db') : make('db')->name($tableName);
     }
 }
 

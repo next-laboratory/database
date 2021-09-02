@@ -65,7 +65,7 @@ class Model extends Collection
     {
         $foreignKey = $foreignKey ?? $model . '_id';
         $key        = $this->name . '_id';
-        return app()->make($model)->where(["$foreignKey = $key"])->select();
+        return make($model)->where(["$foreignKey = $key"])->select();
     }
 
     public function select()
