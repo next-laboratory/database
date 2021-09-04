@@ -18,14 +18,20 @@ use Max\Facade\DB;
  * Class Model
  * @package Max
  */
-class Model extends Collection
+class Model
 {
 
     /**
      * 表名
      * @var $name string|null
      */
-    protected $name = null;
+    protected $table = null;
+
+    protected $fillable = [];
+
+    protected $casts = [];
+
+    protected $timestamps = true;
 
     /**
      * @var Query
@@ -52,7 +58,7 @@ class Model extends Collection
      */
     public function __construct()
     {
-        $this->name = $this->name ?? strtolower(ltrim(strrchr(get_called_class(), '\\'), '\\'));
+        $this->table = $this->table ?? strtolower(ltrim(strrchr(get_called_class(), '\\'), '\\'));
     }
 
     public function with($relations)
@@ -64,13 +70,13 @@ class Model extends Collection
     public function hasOne(string $model, $foreignKey = null, $key = null)
     {
         $foreignKey = $foreignKey ?? $model . '_id';
-        $key        = $this->name . '_id';
+        $key        = $this->table . '_id';
         return app()->make($model)->where(["$foreignKey = $key"])->select();
     }
 
     public function select()
     {
-        $this->items = DB::name($this->name)->select()->toArray();
+        $this->items = DB::name($this->table)->select()->toArray();
         return $this;
     }
 
@@ -86,7 +92,7 @@ class Model extends Collection
 
     final public function __call($method, $arguments)
     {
-        return $this->query->name($this->name)->{$method}(...$arguments);
+        return $this->query->name($this->table)->{$method}(...$arguments);
     }
 
     final public static function __setter(App $app)
