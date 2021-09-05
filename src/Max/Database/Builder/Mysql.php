@@ -3,13 +3,13 @@ declare(strict_types=1);
 
 namespace Max\Database\Builder;
 
-use Max\Database\Builder;
+use Max\Database\AbstractBuilder;
 
 /**
  * Class Mysql
  * @package Max\Db\Drivers
  */
-class Mysql extends Builder
+class Mysql extends AbstractBuilder
 {
 
     protected function quote(string $var): string

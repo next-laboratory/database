@@ -8,7 +8,7 @@ use Max\Exception\InvalidArgumentException;
  * Class Builder
  * @package Max\Database
  */
-class Builder
+abstract class AbstractBuilder
 {
 
     const ORDER_DESC = 'DESC';

@@ -1,12 +1,10 @@
 <?php
 
-
 namespace Max\Database\Builder;
 
+use Max\Database\AbstractBuilder;
 
-use Max\Database\Builder;
-
-class Oci extends Builder
+class Oci extends AbstractBuilder
 {
     /**
      * @param int $limit
