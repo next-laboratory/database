@@ -7,14 +7,14 @@ use Max\App;
 use Max\Facade\DB;
 
 /**
- * @method Driver where(array $where);
- * @method Driver whereIn(array $whereIn);
- * @method Driver whereLike(array $whereLike);
- * @method Driver whereNull(array $whereNull);
- * @method Driver whereNotNull(array $whereNotNull);
- * @method Driver limit(int $limit, int $offset);
+ * @method Query where(array $where);
+ * @method Query whereIn(array $whereIn);
+ * @method Query whereLike(array $whereLike);
+ * @method Query whereNull(array $whereNull);
+ * @method Query whereNotNull(array $whereNotNull);
+ * @method Query limit(int $limit, int $offset);
  * @method insert(array $data);
- * @method Driver field(string|array $fields);
+ * @method Query field(string|array $fields);
  * Class Model
  * @package Max
  */
