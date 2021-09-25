@@ -2,7 +2,7 @@
 
 namespace Max\Database;
 
-class History extends \Max\Collection
+class History extends Collection
 {
 
     public function end()

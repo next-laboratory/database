@@ -8,7 +8,7 @@ namespace Max\Database;
  * Class Collection
  * @package Max
  */
-class Collection extends \Max\Collection
+class Collection extends \Max\Utils\Collection
 {
 
 }

@@ -44,6 +44,11 @@ class Model
      */
     protected $key = 'id';
 
+    public function getKey()
+    {
+        return $this->key;
+    }
+
     protected $relations = [];
 
     /**
