@@ -75,9 +75,31 @@ class Connector
      * PDO实例
      * @return mixed
      */
-    public function handle(bool $isRead = true)
+    public function getPdo(bool $isRead = true)
     {
         return $this->pdo;
+    }
+
+    public function statement($query, $bindings = [])
+    {
+        $statement = $this->getPdo()->prepare($query);
+
+        $this->bindValues($statement, $bindings);
+
+        $statement->execute();
+
+        return $statement;
+    }
+
+    public function bindValues(\PDOStatement $PDOStatement, $bindings)
+    {
+        foreach ($bindings as $key => $value) {
+            $PDOStatement->bindValue(
+                is_string($key) ? $key : $key + 1,
+                $value,
+                is_int($value) ? PDO::PARAM_INT : PDO::PARAM_STR
+            );
+        }
     }
 
 }

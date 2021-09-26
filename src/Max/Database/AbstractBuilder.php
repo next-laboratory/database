@@ -396,10 +396,10 @@ abstract class AbstractBuilder
      * 数据集对象
      * @throws \Exception
      */
-    public function select(string $field = null): string
+    public function select($field = null): string
     {
         if (isset($field)) {
-            $this->fields = $field;
+            $this->fields($field);
         }
         return sprintf(static::SELECT,
             $this->getFields(),

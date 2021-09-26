@@ -65,6 +65,8 @@ class Query
      */
     protected const NAMESPACE = '\\Max\\Database\\Builder\\';
 
+    protected $model;
+
     /**
      * Query constructor.
      * @param array $config
@@ -85,7 +87,7 @@ class Query
 
     public function connection(bool $isRead = true)
     {
-        return $this->connector->handle($isRead);
+        return $this->connector->getPdo($isRead);
     }
 
     /**
@@ -124,19 +126,33 @@ class Query
         return $this->execute($query, $bindParams)->rowCount();
     }
 
+    public function setModel(string $model)
+    {
+        $this->model = $model;
+        return $this;
+    }
+
     /**
      * 查询
      * @return Collection
      */
     public function select($field = null): Collection
     {
-        return new Collection(
-            $this->fetchAll(
-                $this->builder->select($field),
-                $this->builder->getBindParams(),
-                \PDO::FETCH_ASSOC
-            )
-        );
+        $statement = $this->connector->statement($this->builder->select($field), $this->builder->getBindParams());
+        $records   = new Collection();
+        while ($record = $statement->fetch(\PDO::FETCH_ASSOC)) {
+            $records->add(isset($this->model) ? new ($this->model)($record) : $record);
+        }
+
+        return $records;
+
+//        return new Collection(
+//            $this->fetchAll(
+//                $this->builder->select($field),
+//                $this->builder->getBindParams(),
+//                \PDO::FETCH_ASSOC
+//            )
+//        );
     }
 
     /**
@@ -252,15 +268,11 @@ class Query
     /**
      * @return Collection
      */
-    public function get(): Collection
+    public function get()
     {
-        return new Collection(
-            $this->fetch(
-                $this->builder->select(),
-                $this->builder->getBindParams(),
-                \PDO::FETCH_ASSOC
-            )
-        );
+        $statement = $this->connector->statement($this->builder->select(), $this->builder->getBindParams());
+        $record    = $statement->fetch(\PDO::FETCH_ASSOC);
+        return isset($this->model) ? new ($this->model)($record) : $record;
     }
 
     /**
@@ -361,7 +373,7 @@ class Query
      * @param array $data
      * @return \PDOStatement
      */
-    protected function execute(string $query, array $bindParams = null, bool $isRead = true): \PDOStatement
+    public function execute(string $query, array $bindParams = null, bool $isRead = true): \PDOStatement
     {
         $bindParams = $bindParams ?? $this->builder->getBindParams();
         $startTime  = microtime(true);

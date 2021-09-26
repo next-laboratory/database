@@ -1,109 +1,132 @@
 <?php
-declare(strict_types=1);
 
 namespace Max\Database;
 
 use Max\App;
-use Max\Facade\DB;
+use Max\Utils\Traits\HasAttributes;
 
-/**
- * @method Query where(array $where);
- * @method Query whereIn(array $whereIn);
- * @method Query whereLike(array $whereLike);
- * @method Query whereNull(array $whereNull);
- * @method Query whereNotNull(array $whereNotNull);
- * @method Query limit(int $limit, int $offset);
- * @method insert(array $data);
- * @method Query field(string|array $fields);
- * Class Model
- * @package Max
- */
 class Model
 {
 
-    /**
-     * 表名
-     * @var $name string|null
-     */
-    protected $table = null;
+    use HasAttributes;
+
+    protected $table;
+
+    protected $key = 'id';
+
+    protected $cast = [];
 
     protected $fillable = [];
 
-    protected $casts = [];
+    public function __construct(array $attributes = [])
+    {
+        $this->fill($attributes);
+    }
 
-    protected $timestamps = true;
+    public function getFillable()
+    {
+        return $this->fillable;
+    }
 
-    /**
-     * @var Query
-     */
-    protected $query;
+    protected function fillableFromArray(array $attributes)
+    {
+        if (count($this->getFillable()) > 0) {
+            return array_intersect_key($attributes, array_flip($this->getFillable()));
+        }
+        return $attributes;
+    }
 
-    /**
-     * 默认主键
-     * @var $key string
-     */
-    protected $key = 'id';
+    public function fill(array $attributes)
+    {
+        foreach ($this->fillableFromArray($attributes) as $key => $value) {
+            $this->setAttribute($key, $value);
+        }
+        return $this;
+    }
 
     public function getKey()
     {
         return $this->key;
     }
 
-    protected $relations = [];
+    public function getTable()
+    {
+        return $this->table;
+    }
+
+    public static function all(array $columns = ['*'])
+    {
+        return static::query()->select($columns);
+    }
+
+    public static function save(array $options = [])
+    {
+
+    }
 
     /**
-     * 数据集
-     * @var \stdClass
+     * @return Query
      */
-    protected $collection;
-
-    /**
-     * 初始化表名
-     * Model constructor.
-     */
-    public function __construct()
+    public static function query()
     {
-        $this->table = $this->table ?? strtolower(ltrim(strrchr(get_called_class(), '\\'), '\\'));
+        return (new static())->newQuery();
     }
 
-    public function with($relations)
+    public function newQuery()
     {
-        $this->relations = (array)$relations;
-        return $this;
+        return App::getInstance()
+            ->resolve(Query::class)
+            ->setModel(static::class)
+            ->table($this->table);
     }
 
-    public function hasOne(string $model, $foreignKey = null, $key = null)
+    public function destory()
     {
-        $foreignKey = $foreignKey ?? $model . '_id';
-        $key        = $this->table . '_id';
-        return app()->make($model)->where(["$foreignKey = $key"])->select();
+
     }
 
-    public function select()
+    public function __get($key)
     {
-        $this->items = DB::name($this->table)->select()->toArray();
-        return $this;
+        return $this->getAttribute($key);
     }
 
-    public function get()
+    public function __set($key, $value)
     {
-        foreach ($this->relations as $relation) {
-            $this->each(function ($item) use ($relation) {
-                $this->items[$relation] = $this->{$relation}();
-            });
+        return $this->setAttribute($key, $value);
+    }
+
+    public function hasCast($key)
+    {
+        return isset($this->cast[$key]);
+    }
+
+    public function getCast($key)
+    {
+        return $this->cast[$key];
+    }
+
+    public function setAttribute($key, $value)
+    {
+        if ($this->hasCast($key)) {
+            switch ($this->getCast($key)) {
+                case 'int':
+                    $value = intval($value);
+                    break;
+                case 'string':
+                    $value = strval($value);
+                    break;
+                case 'float':
+                    $value = floatval($value);
+                    break;
+                case 'double':
+                    $value = doubleval($value);
+                    break;
+                case 'array':
+                    $value = (array)$value;
+                    break;
+            }
         }
-        return $this->items;
+        $this->attributes[$key] = $value;
     }
 
-    final public function __call($method, $arguments)
-    {
-        return $this->query->name($this->table)->{$method}(...$arguments);
-    }
-
-    final public static function __setter(App $app)
-    {
-        $model        = new static($app);
-        $model->query = $app->db;
-        return $model;
-    }
 }
