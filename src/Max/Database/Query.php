@@ -24,6 +24,7 @@ namespace Max\Database;
  * @method $this group(string $groupBy, $having = '')
  * @method $this limit(int $limit, int $offset = null)
  * Class Db
+ *
  * @package Max
  */
 class Query
@@ -31,24 +32,28 @@ class Query
 
     /**
      * 历史记录
+     *
      * @var History
      */
     protected $history;
 
     /**
      * SQL构造器类名
+     *
      * @var string
      */
     protected $builderClass = '';
 
     /**
      * SQL构造器实例
+     *
      * @var AbstractBuilder
      */
     protected $builder;
 
     /**
      * 监听函数
+     *
      * @var \Closure
      */
     protected $listener;
@@ -62,6 +67,7 @@ class Query
 
     /**
      * 驱动基础命名空间
+     *
      * @var string
      */
     protected const NAMESPACE = '\\Max\\Database\\Builder\\';
@@ -70,7 +76,9 @@ class Query
 
     /**
      * Query constructor.
+     *
      * @param array $config
+     *
      * @throws \Exception
      */
     public function __construct()
@@ -91,7 +99,11 @@ class Query
     {
         $statement = $this->connector->statement($this->builder->where([$this->primaryKey => $id])->select(), $this->builder->getBindParams());
         $record    = $statement->fetch(\PDO::FETCH_ASSOC);
-        return isset($this->model) ? new ($this->model)($record) : $record;
+        if (isset($this->model)) {
+            $model  = $this->model;
+            $record = new $model($record);
+        }
+        return $record;
     }
 
     public function setPrimaryKey(string $key)
@@ -123,8 +135,10 @@ class Query
 
     /**
      * 实际调用驱动方法的方法
+     *
      * @param $method
      * @param $args
+     *
      * @return $this
      */
     public function __call($method, $args)
@@ -135,9 +149,11 @@ class Query
 
     /**
      * 查询
+     *
      * @param string $query
-     * @param array $bindParams
-     * @param bool $all
+     * @param array  $bindParams
+     * @param bool   $all
+     *
      * @return mixed
      */
     public function query(string $query, array $bindParams = [], bool $all = true)
@@ -148,8 +164,10 @@ class Query
 
     /**
      * 执行一条SQL
+     *
      * @param string $query
-     * @param array $bindParams
+     * @param array  $bindParams
+     *
      * @return int
      */
     final public function exec(string $query, array $bindParams = []): int
@@ -165,6 +183,7 @@ class Query
 
     /**
      * 查询
+     *
      * @return Collection
      */
     public function select($field = null): Collection
@@ -172,7 +191,11 @@ class Query
         $statement = $this->connector->statement($this->builder->select($field), $this->builder->getBindParams());
         $records   = new Collection();
         while ($record = $statement->fetch(\PDO::FETCH_ASSOC)) {
-            $records->add(isset($this->model) ? new ($this->model)($record) : $record);
+            if (isset($this->model)) {
+                $model  = $this->model;
+                $record = new $model($record);
+            }
+            $records->add($record);
         }
 
         return $records;
@@ -180,7 +203,9 @@ class Query
 
     /**
      * 获取某一个值的查询
+     *
      * @param $field
+     *
      * @return |null
      */
     public function value($field)
@@ -190,8 +215,10 @@ class Query
 
     /**
      * 查询一列
+     *
      * @param $column
      * 字段名
+     *
      * @return array
      */
     public function column($column): array
@@ -201,9 +228,11 @@ class Query
 
     /**
      * 获取单条
+     *
      * @param string $query
-     * @param array $binds
-     * @param int $fetchType
+     * @param array  $binds
+     * @param int    $fetchType
+     *
      * @return mixed
      */
     public function fetch(string $query, array $binds = [], int $fetchType = \PDO::FETCH_COLUMN)
@@ -213,9 +242,11 @@ class Query
 
     /**
      * 获取全部
+     *
      * @param string $query
-     * @param array $binds
-     * @param int $fetchType
+     * @param array  $binds
+     * @param int    $fetchType
+     *
      * @return array
      */
     public function fetchAll(string $query, array $binds = [], int $fetchType = \PDO::FETCH_COLUMN)
@@ -225,7 +256,9 @@ class Query
 
     /**
      * 查询总数
+     *
      * @param string $field
+     *
      * @return int
      * @throws \Exception
      */
@@ -236,7 +269,9 @@ class Query
 
     /**
      * 求和
+     *
      * @param $field
+     *
      * @return int
      * @throws \Exception
      */
@@ -247,7 +282,9 @@ class Query
 
     /**
      * 查询字段最大值
+     *
      * @param $field
+     *
      * @return int
      * @throws \Exception
      */
@@ -258,7 +295,9 @@ class Query
 
     /**
      * 查询字段最小值
+     *
      * @param $field
+     *
      * @return int
      * @throws \Exception
      */
@@ -269,7 +308,9 @@ class Query
 
     /**
      * 查询字段平均值
+     *
      * @param $field
+     *
      * @return int
      * @throws \Exception
      */
@@ -280,6 +321,7 @@ class Query
 
     /**
      * @param $expression
+     *
      * @return int
      * @throws \Exception
      */
@@ -295,12 +337,18 @@ class Query
     {
         $statement = $this->connector->statement($this->builder->select(), $this->builder->getBindParams());
         $record    = $statement->fetch(\PDO::FETCH_ASSOC);
-        return isset($this->model) ? new ($this->model)($record) : $record;
+        if (isset($this->model)) {
+            $model  = $this->model;
+            $record = new $model($record);
+        }
+        return $record;
     }
 
     /**
      * 更新
+     *
      * @param array $data
+     *
      * @return int
      */
     public function update(array $data): int
@@ -311,7 +359,9 @@ class Query
 
     /**
      * 插入
+     *
      * @param array $data
+     *
      * @return string
      */
     public function insert(array $data): string
@@ -322,6 +372,7 @@ class Query
 
     /**
      * 删除数据
+     *
      * @return mixed
      */
     public function delete()
@@ -350,6 +401,7 @@ class Query
 
     /**
      * 自动提交事务状态更改
+     *
      * @param bool $autoCommit
      */
     public function autoCommit(bool $autoCommit = true)
@@ -368,8 +420,10 @@ class Query
 
     /**
      * 事务
+     *
      * @param \Closure $transaction
      * 需要执行的事务，返回执行结果,有两个参数，一个为query实例，第二个为pdo实例
+     *
      * @return mixed
      * @throws \Exception
      */
@@ -392,8 +446,10 @@ class Query
 
     /**
      * 执行SQL
+     *
      * @param string $query
-     * @param array $data
+     * @param array  $data
+     *
      * @return \PDOStatement
      */
     public function execute(string $query, array $bindParams = null, bool $isRead = true): \PDOStatement
@@ -416,6 +472,7 @@ class Query
 
     /**
      * 历史SQL取得
+     *
      * @return array
      */
     public function getHistory(): \IteratorAggregate
