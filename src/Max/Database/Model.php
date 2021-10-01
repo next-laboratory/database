@@ -3,6 +3,7 @@
 namespace Max\Database;
 
 use Max\App;
+use Max\Utils\Str;
 use Max\Utils\Traits\HasAttributes;
 
 class Model
@@ -18,8 +19,14 @@ class Model
 
     protected $fillable = [];
 
+    protected $original = [];
+
+    protected $hidden = [];
+
     public function __construct(array $attributes = [])
     {
+        is_null($this->table) && $this->table = Str::camel(class_basename(static::class));
+
         $this->fill($attributes);
     }
 
@@ -38,10 +45,21 @@ class Model
 
     public function fill(array $attributes)
     {
+        $this->original = $attributes;
         foreach ($this->fillableFromArray($attributes) as $key => $value) {
             $this->setAttribute($key, $value);
         }
         return $this;
+    }
+
+    public static function get(array $columns = ['*'])
+    {
+        return static::query()->get($columns);
+    }
+
+    public static function find($id, array $columns = [])
+    {
+        return static::query()->find($id, $columns);
     }
 
     public function getKey()
@@ -59,11 +77,6 @@ class Model
         return static::query()->select($columns);
     }
 
-    public static function save(array $options = [])
-    {
-
-    }
-
     /**
      * @return Query
      */
@@ -77,7 +90,8 @@ class Model
         return App::getInstance()
             ->resolve(Query::class)
             ->setModel(static::class)
-            ->table($this->table);
+            ->setTable($this->table)
+            ->setPrimaryKey($this->key);
     }
 
     public function destory()
@@ -95,9 +109,31 @@ class Model
         return $this->setAttribute($key, $value);
     }
 
-    public function hasCast($key)
+    protected function hasCast($key)
     {
         return isset($this->cast[$key]);
+    }
+
+    protected function cast($value, $cast)
+    {
+        switch ($cast) {
+            case 'int':
+                $value = intval($value);
+                break;
+            case 'string':
+                $value = strval($value);
+                break;
+            case 'float':
+                $value = floatval($value);
+                break;
+            case 'double':
+                $value = doubleval($value);
+                break;
+            case 'array':
+                $value = (array)$value;
+                break;
+        }
+        return $value;
     }
 
     public function getCast($key)
@@ -108,23 +144,7 @@ class Model
     public function setAttribute($key, $value)
     {
         if ($this->hasCast($key)) {
-            switch ($this->getCast($key)) {
-                case 'int':
-                    $value = intval($value);
-                    break;
-                case 'string':
-                    $value = strval($value);
-                    break;
-                case 'float':
-                    $value = floatval($value);
-                    break;
-                case 'double':
-                    $value = doubleval($value);
-                    break;
-                case 'array':
-                    $value = (array)$value;
-                    break;
-            }
+            $value = $this->cast($value, $this->getCast($key));
         }
         $this->attributes[$key] = $value;
     }

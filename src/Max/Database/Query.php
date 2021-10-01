@@ -6,7 +6,6 @@ namespace Max\Database;
 /**
  * 数据库外部接口
  * @method $this name(string $table_name, string $alias = '') 表名设置方法, 不带前缀
- * @method $this table(string $table_name, string $alias = '') 表名设置方法，带前缀
  * @method $this where(array $where, string $operator = '=')
  * @method $this whereLike(array $whereLike)
  * @method $this whereNull($whereNull)
@@ -44,7 +43,7 @@ class Query
 
     /**
      * SQL构造器实例
-     * @var Builder
+     * @var AbstractBuilder
      */
     protected $builder;
 
@@ -59,6 +58,8 @@ class Query
      */
     protected $connector;
 
+    protected $primaryKey = 'id';
+
     /**
      * 驱动基础命名空间
      * @var string
@@ -72,8 +73,9 @@ class Query
      * @param array $config
      * @throws \Exception
      */
-    public function __construct(array $config)
+    public function __construct()
     {
+        $config             = config('database');
         $this->builderClass = static::NAMESPACE . ucfirst($config['default']);
         $this->builder      = new $this->builderClass;
         $this->history      = new History();
@@ -85,9 +87,38 @@ class Query
         return new static($app->config->get('database'));
     }
 
+    public function find($id, array $columns = [])
+    {
+        $statement = $this->connector->statement($this->builder->where([$this->primaryKey => $id])->select(), $this->builder->getBindParams());
+        $record    = $statement->fetch(\PDO::FETCH_ASSOC);
+        return isset($this->model) ? new ($this->model)($record) : $record;
+    }
+
+    public function setPrimaryKey(string $key)
+    {
+        $this->primaryKey = $key;
+        return $this;
+    }
+
     public function connection(bool $isRead = true)
     {
         return $this->connector->getPdo($isRead);
+    }
+
+    public function setTable(string $table, $alias = null)
+    {
+        $this->builder->table($table, $alias);
+        return $this;
+    }
+
+    public static function name(string $table, $alias = null)
+    {
+        return static::table($table, $alias);
+    }
+
+    public static function table(string $table, $alias = null)
+    {
+        return (new static())->setTable($table, $alias);
     }
 
     /**
@@ -145,14 +176,6 @@ class Query
         }
 
         return $records;
-
-//        return new Collection(
-//            $this->fetchAll(
-//                $this->builder->select($field),
-//                $this->builder->getBindParams(),
-//                \PDO::FETCH_ASSOC
-//            )
-//        );
     }
 
     /**
@@ -268,7 +291,7 @@ class Query
     /**
      * @return Collection
      */
-    public function get()
+    public function get(array $columns = ['*'])
     {
         $statement = $this->connector->statement($this->builder->select(), $this->builder->getBindParams());
         $record    = $statement->fetch(\PDO::FETCH_ASSOC);
