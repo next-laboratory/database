@@ -5,7 +5,6 @@ namespace Max\Database;
 
 /**
  * 数据库外部接口
- * @method $this name(string $table_name, string $alias = '') 表名设置方法, 不带前缀
  * @method $this where(array $where, string $operator = '=')
  * @method $this whereLike(array $whereLike)
  * @method $this whereNull($whereNull)
@@ -99,11 +98,7 @@ class Query
     {
         $statement = $this->connector->statement($this->builder->where([$this->primaryKey => $id])->select(), $this->builder->getBindParams());
         $record    = $statement->fetch(\PDO::FETCH_ASSOC);
-        if (isset($this->model)) {
-            $model  = $this->model;
-            $record = new $model($record);
-        }
-        return $record;
+        return $this->model ? new ($this->model)($record) : $record;
     }
 
     public function setPrimaryKey(string $key)
@@ -191,10 +186,7 @@ class Query
         $statement = $this->connector->statement($this->builder->select($field), $this->builder->getBindParams());
         $records   = new Collection();
         while ($record = $statement->fetch(\PDO::FETCH_ASSOC)) {
-            if (isset($this->model)) {
-                $model  = $this->model;
-                $record = new $model($record);
-            }
+            $record = isset($this->model) ? new ($this->model)($record) : $record;
             $records->add($record);
         }
 
@@ -337,11 +329,7 @@ class Query
     {
         $statement = $this->connector->statement($this->builder->select(), $this->builder->getBindParams());
         $record    = $statement->fetch(\PDO::FETCH_ASSOC);
-        if (isset($this->model)) {
-            $model  = $this->model;
-            $record = new $model($record);
-        }
-        return $record;
+        return isset($this->model) ? new ($this->model)($record) : $record;
     }
 
     /**
