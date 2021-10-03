@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 namespace Max\Database {
 
-    use Max\Database\Query;
-
     class DatabaseServiceProvider extends ServiceProvider
     {
 
@@ -22,14 +20,19 @@ namespace Max\Database {
 
 namespace {
 
-    /**
-     * DB类助手函数
-     * @param string|null $tableName
-     * @return \Max\Database\Query
-     */
-    function db(string $tableName = null)
-    {
-        return is_null($tableName) ? make('db') : make('db')->name($tableName);
+    if (false === function_exists('db')) {
+        /**
+         * DB类助手函数
+         *
+         * @param string|null $tableName
+         *
+         * @return \Max\Database\Query
+         */
+        function db(string $tableName = null)
+        {
+            return is_null($tableName) ? make('db') : make('db')->name($tableName);
+        }
     }
+
 }
 
