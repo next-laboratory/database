@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace Max {
+namespace Max\Database {
 
     use Max\Database\Query;
 
-    class DatabaseService extends Service
+    class DatabaseServiceProvider extends ServiceProvider
     {
 
         public function register()
