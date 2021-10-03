@@ -3,12 +3,14 @@ declare(strict_types=1);
 
 namespace Max\Database {
 
+    use Max\ServiceProvider;
+
     class DatabaseServiceProvider extends ServiceProvider
     {
 
         public function register()
         {
-            $this->app->alias('db', \Max\Database\Query::class);
+            $this->app->alias('db', Query::class);
         }
 
         public function boot()
