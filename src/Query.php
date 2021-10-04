@@ -94,11 +94,20 @@ class Query
         return new static($app->config->get('database'));
     }
 
+    protected function getModel($record)
+    {
+        if (is_null($this->model)) {
+            return $record;
+        }
+        $model = $this->model;
+        return new $model($record);
+    }
+
     public function find($id, array $columns = [])
     {
         $statement = $this->connector->statement($this->builder->where([$this->primaryKey => $id])->select(), $this->builder->getBindParams());
         $record    = $statement->fetch(\PDO::FETCH_ASSOC);
-        return $this->model ? new ($this->model)($record) : $record;
+        return $this->getModel($record);
     }
 
     public function setPrimaryKey(string $key)
@@ -186,7 +195,7 @@ class Query
         $statement = $this->connector->statement($this->builder->select($field), $this->builder->getBindParams());
         $records   = new Collection();
         while ($record = $statement->fetch(\PDO::FETCH_ASSOC)) {
-            $record = isset($this->model) ? new ($this->model)($record) : $record;
+            $record = $this->getModel($record);
             $records->add($record);
         }
 
@@ -329,7 +338,7 @@ class Query
     {
         $statement = $this->connector->statement($this->builder->select(), $this->builder->getBindParams());
         $record    = $statement->fetch(\PDO::FETCH_ASSOC);
-        return isset($this->model) ? new ($this->model)($record) : $record;
+        return $this->getModel($record);
     }
 
     /**
