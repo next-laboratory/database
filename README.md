@@ -7,7 +7,7 @@
 <p align="center">轻量 • 简单 • 快速</p>
 
 <p align="center">
-<img src="https://img.shields.io/badge/php-%3E%3D7.2.0-brightgreen">
+<img src="https://img.shields.io/badge/php-%3E%3D7.4-brightgreen">
 <img src="https://img.shields.io/badge/license-apache%202-blue">
 </p>
 
@@ -15,11 +15,9 @@ Max框架数据库组件
 
 # 安装
 
-> 该扩展依赖于MaxPHP,Max-Framework ，所以需要先安装MaxPHP
+> 使用该包需要先安装MaxPHP
 
-```shell
-composer create-project max/max
-```
+<a href="https://github.com/topyao/max/blob/master/README.md">README.md</a>
 
 ## 安装
 
@@ -27,11 +25,17 @@ composer create-project max/max
 composer require max/database
 ```
 
+## 安装开发版
+
+```shell
+composer require max/database:dev-master
+```
+
 # 使用
 
 ## 注册服务提供者
 
-在`/config/http.php` 或者`/config/console.php`中的`provider`下注册服务提供者类`\Max\DatabaseService::class`
+在`\App\Http\Kernel::class` 或者`\App\Console\Kernel::class`中的`providers`下注册服务提供者类`\Max\Database\DatabaseServiceProvider::class`
 
 ## 配置文件
 
