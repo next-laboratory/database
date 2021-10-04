@@ -2,11 +2,12 @@
 
 namespace Max\Database;
 
+use ArrayAccess;
 use Max\App;
 use Max\Utils\Str;
 use Max\Utils\Traits\HasAttributes;
 
-class Model
+class Model implements ArrayAccess
 {
 
     use HasAttributes;
@@ -97,16 +98,6 @@ class Model
     public function destory()
     {
 
-    }
-
-    public function __get($key)
-    {
-        return $this->getAttribute($key);
-    }
-
-    public function __set($key, $value)
-    {
-        return $this->setAttribute($key, $value);
     }
 
     protected function hasCast($key)
