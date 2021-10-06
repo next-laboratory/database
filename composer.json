@@ -28,7 +28,7 @@
   "extra": {
     "max": {
       "config": {
-        "database": "src/database.php"
+        "database": "publish/database.php"
       }
     }
   }

@@ -7,7 +7,6 @@ namespace Max\Database {
 
     class DatabaseServiceProvider extends ServiceProvider
     {
-
         public function register()
         {
             $this->app->alias('db', Query::class);

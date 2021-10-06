@@ -58,6 +58,12 @@ class Model implements ArrayAccess
         return static::query()->get($columns);
     }
 
+    /**
+     * @param       $id
+     * @param array $columns
+     *
+     * @return Model
+     */
     public static function find($id, array $columns = [])
     {
         return static::query()->find($id, $columns);
