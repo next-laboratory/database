@@ -103,9 +103,9 @@ class Query
         return new $model($record);
     }
 
-    public function find($id, array $columns = [])
+    public function find($id, array $columns = ['*'])
     {
-        $statement = $this->connector->statement($this->builder->where([$this->primaryKey => $id])->select(), $this->builder->getBindParams());
+        $statement = $this->connector->statement($this->builder->where([$this->primaryKey => $id])->select($columns), $this->builder->getBindParams());
         $record    = $statement->fetch(\PDO::FETCH_ASSOC);
         return $this->getModel($record);
     }
