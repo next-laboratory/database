@@ -146,4 +146,9 @@ class Model implements ArrayAccess
         $this->attributes[$key] = $value;
     }
 
+    public function toArray()
+    {
+        return $this->attributes;
+    }
+
 }

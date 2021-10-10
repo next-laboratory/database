@@ -96,6 +96,9 @@ class Query
 
     protected function getModel($record)
     {
+        if (false === $record) {
+            return false;
+        }
         if (is_null($this->model)) {
             return $record;
         }
