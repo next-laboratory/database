@@ -83,6 +83,6 @@ return [
 
 ## 方法
 
-安装完成后就可以使用`\Max\Facade\DB::name($table);`等的方式来使用Database扩展，或者使用助手函数`db($tableName)`
+安装完成后就可以使用`\Max\Facades\DB::name($table);`等的方式来使用Database扩展，或者使用助手函数`db($tableName)`
 
 > 官网：https://www.chengyao.xyz
