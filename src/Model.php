@@ -3,7 +3,7 @@
 namespace Max\Database;
 
 use ArrayAccess;
-use Max\App;
+use Max\Foundation\App;
 use Max\Database\Model\Relations\HasOne;
 use Max\Utils\Contracts\Arrayable;
 use Max\Utils\Str;

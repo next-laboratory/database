@@ -88,7 +88,7 @@ class Query
         $this->connector    = new Connector($config);
     }
 
-    public static function __setter(\Max\App $app)
+    public static function __setter(\Max\Foundation\App $app)
     {
         return new static($app->config->get('database'));
     }
