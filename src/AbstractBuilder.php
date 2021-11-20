@@ -6,6 +6,7 @@ use Max\Exception\InvalidArgumentException;
 
 /**
  * Class Builder
+ *
  * @package Max\Database
  */
 abstract class AbstractBuilder
@@ -21,66 +22,77 @@ abstract class AbstractBuilder
 
     /**
      * 绑定的参数
+     *
      * @var array
      */
-    protected $bindParams = [];
+    protected array $bindings = [];
 
     /**
      * 数据表前缀
+     *
      * @var string
      */
     protected $prefix = '';
 
     /**
      * 字段列表
+     *
      * @var string
      */
     protected $fields = '';
 
     /**
      * LIMIT
+     *
      * @var string
      */
     protected $limit = '';
 
     /**
      * GROUP BY
+     *
      * @var string
      */
     protected $group = '';
 
     /**
      * HAVING
+     *
      * @var string
      */
     protected $having = '';
 
     /**
      * JOIN
+     *
      * @var string
      */
     protected $join = '';
 
     /**
      * ORDER BY
+     *
      * @var string
      */
     protected $order = '';
 
     /**
      * 表名
+     *
      * @var string
      */
     protected $table = '';
 
     /**
      * WHERE 子句
+     *
      * @var string
      */
     protected $where = '';
 
     /**
      * 获取whereSQL
+     *
      * @return string
      */
     protected function getWhere(): string
@@ -90,45 +102,60 @@ abstract class AbstractBuilder
 
     /**
      * 绑定参数取得
+     *
      * @return array
      */
     public function getBindParams()
     {
-        return $this->bindParams;
+        return $this->bindings;
     }
 
     /**
-     * where条件表达式
-     * @param array $where
-     * @param string $operator
+     *  where条件表达式
+     *
+     * @param        $keyOrArray
+     * @param string $operatorOrValue
+     * @param null   $value
+     *
      * @return $this
      */
-    public function where(array $where, string $operator = '=')
+    public function where($keyOrArray, string $operatorOrValue = '=', $value = null)
     {
-        foreach ($where as $key => $value) {
-            if (is_numeric($key)) {
-                $this->where .= " AND {$value}";
-            } else {
-                $this->where        .= " AND {$key} {$operator} ?";
-                $this->bindParams[] = $value;
+        if (is_array($keyOrArray)) {
+            foreach ($keyOrArray as $k => $v) {
+                $this->jointWhere($k, $v, $operatorOrValue);
             }
+        } else {
+            $this->jointWhere($keyOrArray, $value, $operatorOrValue);
         }
+        return $this;
+    }
+
+    protected function jointWhere($key, $value, $operator)
+    {
+        $this->where        .= " AND {$key} {$operator} ?";
+        $this->bindings[] = $value;
         return $this;
     }
 
     /**
      * 模糊查询
-     * @param array $whereLike
+     *
+     * @param array $keyOrArray
+     * @param null  $value
+     *
      * @return $this
      */
-    public function whereLike(array $whereLike)
+    public function whereLike(array $keyOrArray, $value = null)
     {
-        return $this->where($whereLike, 'LIKE');
+        return $this->where($keyOrArray, 'LIKE', $value);
     }
 
     /**
      * WHERE NULL
+     *
      * @param string|array $whereNull
+     *
      * @return $this
      */
     public function whereNull(string $nullField)
@@ -139,7 +166,9 @@ abstract class AbstractBuilder
 
     /**
      * WHERE NOT NULL
+     *
      * @param array|string $whereNotNull
+     *
      * @return $this
      */
     public function whereNotNull(string $notNullField)
@@ -150,8 +179,10 @@ abstract class AbstractBuilder
 
     /**
      * WHERE OR
-     * @param array $whereOr
+     *
+     * @param array  $whereOr
      * @param string $operator
+     *
      * @return $this
      */
     public function whereOr(array $whereOr, string $operator = '=')
@@ -161,7 +192,7 @@ abstract class AbstractBuilder
                 $this->where .= " OR {$value}";
             } else {
                 $this->where        .= " OR {$key} {$operator} ?";
-                $this->bindParams[] = $value;
+                $this->bindings[] = $value;
             }
         }
         return $this;
@@ -169,7 +200,9 @@ abstract class AbstractBuilder
 
     /**
      * WHERE IN
+     *
      * @param array $whereIn
+     *
      * @return $this
      */
     public function whereIn(array $whereIn)
@@ -178,7 +211,7 @@ abstract class AbstractBuilder
             $range       = (array)$range;
             $bindStr     = rtrim(str_repeat('?,', count($range)), ',');
             $this->where .= " AND {$column} IN ({$bindStr})";
-            array_push($this->bindParams, ...array_values($range));
+            array_push($this->bindings, ...array_values($range));
         }
         return $this;
     }
@@ -189,14 +222,16 @@ abstract class AbstractBuilder
             $range       = (array)$range;
             $bindStr     = rtrim(str_repeat('?,', count($range)), ',');
             $this->where .= " AND {$column} NOT IN ({$bindStr})";
-            array_push($this->bindParams, ...$range);
+            array_push($this->bindings, ...$range);
         }
         return $this;
     }
 
     /**
      * WHERE BETWEEN
+     *
      * @param array $whereBetween
+     *
      * @return $this
      */
     public function whereBetween(array $whereBetween)
@@ -206,7 +241,7 @@ abstract class AbstractBuilder
                 $this->where .= " AND {$value}";
             } else if (2 === count($value)) {
                 $this->where .= " AND {$field} BETWEEN ? AND ?";
-                array_push($this->bindParams, ...$value);
+                array_push($this->bindings, ...$value);
             } else {
                 throw new InvalidArgumentException('whereBetween参数有误');
             }
@@ -216,7 +251,9 @@ abstract class AbstractBuilder
 
     /**
      * WHERE EXISTS
+     *
      * @param array $whereExists
+     *
      * @return $this
      */
     public function whereExists(array $whereExists)
@@ -248,7 +285,9 @@ abstract class AbstractBuilder
 
     /**
      * 表明设置方法，不包含前缀
+     *
      * @param string $table
+     *
      * @return $this
      */
     public function name(string $table, string $alias = null)
@@ -258,7 +297,9 @@ abstract class AbstractBuilder
 
     /**
      * 带前缀的表名
+     *
      * @param string $table
+     *
      * @return $this
      */
     public function table(string $table, string $alias = null)
@@ -272,8 +313,10 @@ abstract class AbstractBuilder
 
     /**
      * order排序操作，支持多字段排序
+     *
      * @param array $order
      * 传入数组形式的排序字段，例如['id' => 'desc','name' => 'asc']
+     *
      * @return $this
      */
     public function order(string $order, $sort = 'ASC')
@@ -292,7 +335,9 @@ abstract class AbstractBuilder
 
     /**
      * 内联
+     *
      * @param array $joinTables
+     *
      * @return $this
      * @throws \Exception
      */
@@ -304,7 +349,9 @@ abstract class AbstractBuilder
 
     /**
      * 左联
+     *
      * @param array $joinTables
+     *
      * @return $this
      * @throws \Exception
      */
@@ -315,7 +362,9 @@ abstract class AbstractBuilder
 
     /**
      * 右联
+     *
      * @param array $joinTables
+     *
      * @return $this
      * @throws \Exception
      */
@@ -331,6 +380,7 @@ abstract class AbstractBuilder
 
     /**
      * @param string|array $fields
+     *
      * @return $this
      */
     public function fields($fields = '*')
@@ -351,7 +401,9 @@ abstract class AbstractBuilder
 
     /**
      * GROUP BY
+     *
      * @param array $group
+     *
      * @return $this
      */
     public function group(string $groupBy, string $having = '')
@@ -365,6 +417,7 @@ abstract class AbstractBuilder
 
     /**
      * 取得group子句
+     *
      * @return string
      */
     protected function getGroup(): string
@@ -380,8 +433,10 @@ abstract class AbstractBuilder
 
     /**
      * limit
-     * @param int $limit
+     *
+     * @param int      $limit
      * @param int|null $offset
+     *
      * @return $this
      */
     public function limit(int $limit, int $offset = null)
@@ -392,6 +447,7 @@ abstract class AbstractBuilder
 
     /**
      * 查询
+     *
      * @return Collection
      * 数据集对象
      * @throws \Exception
@@ -414,6 +470,7 @@ abstract class AbstractBuilder
 
     /**
      * 删除数据
+     *
      * @return string
      * 影响的行数
      * @throws \Exception
@@ -428,7 +485,9 @@ abstract class AbstractBuilder
 
     /**
      * 更新
+     *
      * @param array $data
+     *
      * @return string
      * @throws \Exception
      */
@@ -439,7 +498,7 @@ abstract class AbstractBuilder
             $set .= "{$field} = ? , ";
         }
         $set = substr($set, 0, -3);
-        array_unshift($this->bindParams, ...array_values($data));
+        array_unshift($this->bindings, ...array_values($data));
         return sprintf(static::UPDATE,
             $this->getTable(),
             $set,
@@ -449,19 +508,21 @@ abstract class AbstractBuilder
 
     /**
      * INSERT 语句取得
+     *
      * @param array $data
+     *
      * @return string
      * @throws \Exception
      */
     public function insert(array $data)
     {
-        $this->bindParams = [];
+        $this->bindings = [];
         $columns          = '';
         if (array_keys($data) !== range(0, count($data) - 1)) {
             $columns = ' (' . implode(',', array_keys($data)) . ')';
         }
         $values = ' VALUES (' . rtrim(str_repeat('?,', count($data)), ',') . ')';
-        array_push($this->bindParams, ...array_values($data));
+        array_push($this->bindings, ...array_values($data));
         return sprintf(static::INSERT,
             $this->getTable(),
             $columns,

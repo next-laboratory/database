@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Max\Database {
 
-    use Max\ServiceProvider;
+    use Max\Foundation\ServiceProvider;
 
     class DatabaseServiceProvider extends ServiceProvider
     {

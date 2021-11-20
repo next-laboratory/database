@@ -28,7 +28,6 @@ namespace Max\Database;
  */
 class Query
 {
-
     /**
      * 历史记录
      *
@@ -354,7 +353,7 @@ class Query
     public function update(array $data): int
     {
         return $this->execute($this->builder->update($data))
-            ->rowCount();
+                    ->rowCount();
     }
 
     /**
@@ -378,7 +377,7 @@ class Query
     public function delete()
     {
         return $this->execute($this->builder->delete())
-            ->rowCount();
+                    ->rowCount();
     }
 
     /**

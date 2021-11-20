@@ -4,10 +4,12 @@ namespace Max\Database;
 
 use ArrayAccess;
 use Max\App;
+use Max\Database\Model\Relations\HasOne;
+use Max\Utils\Contracts\Arrayable;
 use Max\Utils\Str;
 use Max\Utils\Traits\HasAttributes;
 
-class Model implements ArrayAccess
+class Model implements ArrayAccess, Arrayable
 {
 
     use HasAttributes;
@@ -79,6 +81,14 @@ class Model implements ArrayAccess
         return $this->table;
     }
 
+    public function hasOne(string $relation, ?string $foreignKey, ?string $localKey): HasOne
+    {
+        /* @var Model $relation*/
+        $relation = new $relation;
+        $relation::query()->where();
+        return new HasOne($this->newQuery());
+    }
+
     public static function all(array $columns = ['*'])
     {
         return static::query()->select($columns);
@@ -95,10 +105,10 @@ class Model implements ArrayAccess
     public function newQuery()
     {
         return App::getInstance()
-            ->resolve(Query::class)
-            ->setModel(static::class)
-            ->setTable($this->table)
-            ->setPrimaryKey($this->key);
+                  ->resolve(Query::class)
+                  ->setModel(static::class)
+                  ->setTable($this->table)
+                  ->setPrimaryKey($this->key);
     }
 
     public function destory()
@@ -146,7 +156,7 @@ class Model implements ArrayAccess
         $this->attributes[$key] = $value;
     }
 
-    public function toArray()
+    public function toArray(): array
     {
         return $this->attributes;
     }
