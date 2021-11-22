@@ -3,8 +3,8 @@
 namespace Max\Database;
 
 use ArrayAccess;
-use Max\Foundation\App;
 use Max\Database\Model\Relations\HasOne;
+use Max\Foundation\App;
 use Max\Utils\Contracts\Arrayable;
 use Max\Utils\Str;
 use Max\Utils\Traits\HasAttributes;
@@ -83,7 +83,7 @@ class Model implements ArrayAccess, Arrayable
 
     public function hasOne(string $relation, ?string $foreignKey, ?string $localKey): HasOne
     {
-        /* @var Model $relation*/
+        /* @var Model $relation */
         $relation = new $relation;
         $relation::query()->where();
         return new HasOne($this->newQuery());
@@ -102,6 +102,10 @@ class Model implements ArrayAccess, Arrayable
         return (new static())->newQuery();
     }
 
+    /**
+     * @return Query
+     * @throws \ReflectionException
+     */
     public function newQuery()
     {
         return App::getInstance()
@@ -111,9 +115,14 @@ class Model implements ArrayAccess, Arrayable
                   ->setPrimaryKey($this->key);
     }
 
-    public function destory()
+    public function save()
     {
+        return self::query()->insert($this->attributes);
+    }
 
+    public static function create(array $attributes)
+    {
+        return (new static($attributes))->save();
     }
 
     protected function hasCast($key)
