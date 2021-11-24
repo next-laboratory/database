@@ -1,0 +1,101 @@
+<?php
+
+namespace Max\Database\Query\Grammar;
+
+use Max\Database\Contracts\GrammarInterface;
+use Max\Database\Query\Builder;
+use Max\Database\Query\Join;
+use Max\Database\Query\Raw;
+
+class Grammar implements GrammarInterface
+{
+    protected array $select = [
+        'aggregate',
+        'select',
+        'from',
+        'join',
+        'where',
+        'group',
+        'having',
+        'order',
+        'limit',
+        'offset',
+        'lock'
+    ];
+
+    protected function compileJoin(Builder $builder)
+    {
+        $joins = array_map(function(Join $item) {
+            $alias = $item->alias ? 'AS ' . $item->alias : '';
+            $on    = $item->on ? ('ON ' . implode('', $item->on)) : '';
+            return ' ' . $item->league . ' ' . $item->table . ' ' . $alias . ' ' . $on;
+        }, $builder->join);
+
+        return implode('', $joins);
+    }
+
+    protected function compileWhere(Builder $builder)
+    {
+        $whereCondition = [];
+        foreach ($builder->where as $where) {
+            $whereCondition[] = implode(' ', $where);
+        }
+        return ' WHERE ' . implode(' AND ', $whereCondition);
+    }
+
+    protected function compileFrom(Builder $builder)
+    {
+        return ' FROM ' . implode(' AS ', array_filter($builder->from));
+    }
+
+    protected function compileSelect(Builder $builder)
+    {
+        return implode(', ', $builder->select);
+    }
+
+    protected function compileOrder(Builder $builder)
+    {
+        $orderBy = array_map(function($item) {
+            return $item[0] instanceof Raw ? $item[0]->__toString() : implode(' ', $item);
+        }, $builder->order);
+
+        return ' ORDER BY ' . implode(', ', $orderBy);
+    }
+
+    protected function compileGroup(Builder $builder)
+    {
+        return ' GROUP BY ' . implode(', ', $builder->group);
+    }
+
+    protected function compileHaving(Builder $builder)
+    {
+        $having = array_map(function($item) {
+            return implode(' ', $item);
+        }, $builder->having);
+
+        return ' HAVING ' . implode(' AND ', $having);
+    }
+
+    public function generateSelectQuery(Builder $builder)
+    {
+        $query = 'SELECT ';
+        foreach ($this->select as $value) {
+            $compiler = 'compile' . ucfirst($value);
+            if (!empty($builder->{$value})) {
+                $query .= $this->{$compiler}($builder);
+            }
+        }
+        return $query;
+    }
+
+    public function generateInsertQuery(Builder $builder)
+    {
+        $columns = implode(', ', $builder->column);
+        $value   = implode(', ', array_fill(0, count($builder->bindings), '?'));
+        $table   = $builder->from[0];
+
+        return sprintf('INSERT INTO %s(%s) VALUES(%s)', $table, $columns, $value);
+    }
+
+
+}
