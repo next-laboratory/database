@@ -4,6 +4,10 @@ namespace Max\Database\Connectors;
 
 use Max\Database\Config;
 use Max\Database\Contracts\ConnectorInterface;
+use Max\Database\Contracts\GrammarInterface;
+use Max\Database\Query\Grammar\Grammar;
+use Max\Database\Query\Grammar\MySqlGrammar;
+use Max\Database\Query\Grammar\PgSqlGrammar;
 
 abstract class Connector implements ConnectorInterface
 {
@@ -19,6 +23,8 @@ abstract class Connector implements ConnectorInterface
      */
     protected string $driver = '';
 
+    protected ?GrammarInterface $grammar;
+
     /**
      * @param Config $config
      */
@@ -31,6 +37,26 @@ abstract class Connector implements ConnectorInterface
             $config->getPassword(),
             $config->getOptions()
         );
+        $this->getGrammar();
+    }
+
+    public function getGrammar(): GrammarInterface
+    {
+        if (!isset($this->grammar)) {
+            switch (true) {
+                case $this instanceof MySqlConnector:
+                    $this->grammar = new MySqlGrammar();
+                    break;
+                case $this instanceof PsqlConnector:
+                    $this->grammar = new PgSqlGrammar();
+                    break;
+                default:
+                    $this->grammar = new Grammar();
+                    break;
+            }
+        }
+
+        return $this->grammar;
     }
 
     /**

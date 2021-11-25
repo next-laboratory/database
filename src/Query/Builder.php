@@ -63,10 +63,10 @@ class Builder
      * @param ConnectorInterface $connector
      * @param GrammarInterface   $grammar
      */
-    public function __construct(ConnectorInterface $connector, GrammarInterface $grammar)
+    public function __construct(ConnectorInterface $connector)
     {
         $this->connector = $connector;
-        $this->grammar   = $grammar;
+        $this->grammar   = $connector->getGrammar();
     }
 
     /**
@@ -167,6 +167,12 @@ class Builder
         return $this->join[] = new Join($this, $table, $alias, $league);
     }
 
+    /**
+     * @param $table
+     * @param $alias
+     *
+     * @return Join
+     */
     public function leftJoin($table, $alias)
     {
         return $this->join($this, $table, $alias, 'LEFT OUT JOIN');
@@ -196,6 +202,15 @@ class Builder
     public function getBindings(): array
     {
         return $this->bindings;
+    }
+
+    public function setBindings($bindings)
+    {
+        if (is_array($bindings)) {
+            $this->bindings = [...$this->bindings, ...$bindings];
+        } else {
+            $this->bindings[] = $bindings;
+        }
     }
 
     public function select(array $columns = ['*'])
@@ -236,7 +251,7 @@ class Builder
     public function get(array $columns = ['*'])
     {
         return Collection::make(
-            $this->run($this->toSql($columns), $this->bindings)
+            $this->run($this->toSql($columns))
                  ->fetchAll(\PDO::FETCH_ASSOC)
         );
     }
@@ -268,7 +283,7 @@ class Builder
 
     protected function aggregate(string $expression): int
     {
-        return (int)$this->run($this->toSql((array)($expression . 'AS AGGREGATE ')), $this->bindings)
+        return (int)$this->run($this->toSql((array)($expression . 'AS AGGREGATE ')))
                          ->fetchColumn(0);
     }
 
@@ -297,12 +312,12 @@ class Builder
     {
         $query = sprintf('SELECT EXISTS(%s) AS MAX_EXIST', $this->toSql());
 
-        return (bool)$this->run($query, $this->bindings)->fetchColumn(0);
+        return (bool)$this->run($query)->fetchColumn(0);
     }
 
     public function column(string $column, string $key = null)
     {
-        $result = $this->run($this->toSql(), $this->bindings)->fetchAll();
+        $result = $this->run($this->toSql())->fetchAll();
 
         return Collection::make($result ?: [])->pluck($column, $key);
     }
@@ -314,16 +329,16 @@ class Builder
 
     public function first(array $columns = ['*'])
     {
-        return $this->run($this->toSql($columns), $this->bindings)->fetch(\PDO::FETCH_ASSOC);
+        return $this->run($this->toSql($columns))->fetch(\PDO::FETCH_ASSOC);
     }
 
     public function insert(array $data)
     {
         $this->column   = array_keys($data);
         $this->bindings = array_values($data);
-        $this->run($this->grammar->generateInsertQuery($this), $this->bindings);
+        $this->run($this->grammar->generateInsertQuery($this));
 
-        return $this->connection->getPDO()->lastInsertId();
+        return $this->connector->getPDO()->lastInsertId();
     }
 
     public function insertAll(array $data)
@@ -333,24 +348,16 @@ class Builder
         }, $data);
     }
 
-    //    public function update(array $data): string
-    //    {
-    //        $set = '';
-    //        foreach ($data as $field => $value) {
-    //            $set .= "{$field} = ? , ";
-    //        }
-    //        $set = substr($set, 0, -3);
-    //        array_unshift($this->bindings, ...array_values($data));
-    //        return sprintf(static::UPDATE,
-    //            $this->getTable(),
-    //            $set,
-    //            $this->getWhere()
-    //        );
-    //    }
-
-    public function run(string $query, array $bindings): \PDOStatement
+    public function update(array $data)
     {
-        $PDOStatement = $this->connector->statement($query, $bindings);
+        $query = $this->grammar->generateUpdateQuery($this, $data);
+
+        return $this->run($query)->rowCount();
+    }
+
+    public function run(string $query): \PDOStatement
+    {
+        $PDOStatement = $this->connector->statement($query, $this->bindings);
 
         $PDOStatement->execute();
 

@@ -17,4 +17,6 @@ interface ConnectorInterface
     public function getPdo(): \PDO;
 
     public function getDsn(Config $config): string;
+
+    public function getGrammar(): GrammarInterface;
 }

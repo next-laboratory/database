@@ -1,10 +1,11 @@
 <?php
 
 return [
+    'default'     => 'mysql',
     'connections' => [
-        'default' => [
+        'mysql' => [
+            //驱动
             'driver'   => '\Max\Database\Connectors\MySqlConnector',
-            'grammar'  => '\Max\Database\Query\Grammar\MySqlGrammar',
             //可以使用dsn来配置更多参数，会优先使用该参数
             'dsn'      => '',
             //主机地址
@@ -23,10 +24,6 @@ return [
             'charset'  => env('database . charset', 'utf8mb4'),
             //数据表前缀
             'prefix'   => '',
-            //主
-            'master'   => [],
-            //从
-            'slave'    => []
         ],
     ],
 

@@ -19,11 +19,6 @@ class Manager
     protected array $connectors = [];
 
     /**
-     * @var array
-     */
-    protected array $grammars = [];
-
-    /**
      * @param array $config
      */
     public function __construct(array $config)
@@ -43,27 +38,27 @@ class Manager
      *
      * @return Builder
      */
-    public function table($name, $alias = null, $connection = 'default')
+    public function table($name, $alias = null, $connection = null)
     {
         return $this->connect($connection)->from($name, $alias);
     }
 
-    public function select(string $query, array $bindings = [], string $connection = 'default')
+    public function select(string $query, array $bindings = [], ?string $connection = null)
     {
         return $this->connect($connection)->run($query, $bindings)->fetchAll(\PDO::FETCH_ASSOC);
     }
 
-    public function first(string $query, array $bindings = [], string $connection = 'default')
+    public function first(string $query, array $bindings = [], ?string $connection = null)
     {
         return $this->connect($connection)->run($query, $bindings)->fetch(\PDO::FETCH_ASSOC);
     }
 
-    public function delete(string $query, array $bindings = [], string $connection = 'default')
+    public function delete(string $query, array $bindings = [], ?string $connection = null)
     {
         return $this->connect($connection)->run($query, $bindings)->rowCount();
     }
 
-    public function insert(string $query, array $bindings = [], string $connection = 'default')
+    public function insert(string $query, array $bindings = [], ?string $connection = null)
     {
         $this->connect($connection)->run($query, $bindings);
 
@@ -75,7 +70,7 @@ class Manager
 
     }
 
-    public function cursor(string $query, array $bindings = [], string $connection = 'default')
+    public function cursor(string $query, array $bindings = [], ?string $connection = null)
     {
         $cursor = $this->connect($connection)->run($query, $bindings);
 
@@ -89,27 +84,16 @@ class Manager
      *
      * @return Builder
      */
-    public function connect($name = 'default')
+    public function connect(?string $name = null)
     {
+        $name = $name ?? $this->config['default'];
         if (!$this->hasConnection($name)) {
             $config                  = new Config($this->config['connections'][$name]);
             $connector               = $config->getDriver();
-            $grammar                 = $config->getGrammar();
             $this->connectors[$name] = new $connector($config);
-            $this->grammars[$name]   = new $grammar();
         }
 
-        return new Builder($this->getConnector($name), $this->getGrammar($name));
-    }
-
-    /**
-     * @param $name
-     *
-     * @return mixed
-     */
-    public function getGrammar($name)
-    {
-        return $this->grammars[$name];
+        return new Builder($this->getConnector($name));
     }
 
     /**

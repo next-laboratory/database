@@ -97,5 +97,23 @@ class Grammar implements GrammarInterface
         return sprintf('INSERT INTO %s(%s) VALUES(%s)', $table, $columns, $value);
     }
 
+    public function generateUpdateQuery(Builder $builder, array $data)
+    {
+        $columns = $values = [];
+        foreach ($data as $key => $value) {
+            if ($value instanceof Raw) {
+                $placeHolder = $value->__toString();
+            } else {
+                $placeHolder = '?';
+                $values[]    = $value;
+            }
+            $columns[] = $key . ' = ' . $placeHolder;
+        }
+
+        array_unshift($builder->bindings, ...$values);
+        $where = empty($builder->where) ? '' : $this->compileWhere($builder);
+
+        return sprintf('UPDATE %s SET %s%s', $builder->from[0], implode(', ', $columns), $where);
+    }
 
 }
