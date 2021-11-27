@@ -8,13 +8,27 @@ use Max\Database\Contracts\GrammarInterface;
 use Max\Database\Query\Grammar\Grammar;
 use Max\Database\Query\Grammar\MySqlGrammar;
 use Max\Database\Query\Grammar\PgSqlGrammar;
+use PDO;
 
 abstract class Connector implements ConnectorInterface
 {
     /**
-     * @var \PDO
+     * @var PDO
      */
-    protected \PDO $PDO;
+    protected PDO $PDO;
+
+    /**
+     * 默认配置
+     *
+     * @var array
+     */
+    protected array $options = [
+        PDO::ATTR_CASE         => PDO::CASE_NATURAL,
+        PDO::ATTR_ERRMODE      => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_ORACLE_NULLS => PDO::NULL_NATURAL,
+        //        PDO::ATTR_STRINGIFY_FETCHES => false,
+        //        PDO::ATTR_EMULATE_PREPARES  => false,
+    ];
 
     /**
      * PDO驱动名
@@ -35,9 +49,14 @@ abstract class Connector implements ConnectorInterface
             $this->getDsn($config),
             $config->getUser(),
             $config->getPassword(),
-            $config->getOptions()
+            $this->getOptions($config)
         );
         $this->getGrammar();
+    }
+
+    protected function getOptions(Config $config)
+    {
+        return array_merge($this->options, $config->getOptions());
     }
 
     public function getGrammar(): GrammarInterface

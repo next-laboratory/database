@@ -18,14 +18,6 @@ class Config
     protected string  $charset  = 'utf8';
     protected string  $prefix   = '';
 
-    protected array $defaultOptions = [
-        PDO::ATTR_CASE              => PDO::CASE_NATURAL,
-        PDO::ATTR_ERRMODE           => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_ORACLE_NULLS      => PDO::NULL_NATURAL,
-        PDO::ATTR_STRINGIFY_FETCHES => false,
-        PDO::ATTR_EMULATE_PREPARES  => false,
-    ];
-
     public function __construct(array $config)
     {
         foreach ($config as $key => $value) {
@@ -102,7 +94,7 @@ class Config
      */
     public function getOptions(): array
     {
-        return array_merge($this->defaultOptions, $this->options);
+        return $this->options;
     }
 
     /**
