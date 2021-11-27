@@ -159,6 +159,9 @@ class Builder
      */
     public function whereIn(string $column, array $in)
     {
+        if (empty($in)) {
+            return $this;
+        }
         $this->addBindings($in);
         $this->where($column, sprintf('IN (%s)', rtrim(str_repeat('?, ', count($in)), ' ,')));
 
