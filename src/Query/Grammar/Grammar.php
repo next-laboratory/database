@@ -27,7 +27,7 @@ class Grammar implements GrammarInterface
     {
         $joins = array_map(function(Join $item) {
             $alias = $item->alias ? 'AS ' . $item->alias : '';
-            $on    = $item->on ? ('ON ' . implode('', $item->on)) : '';
+            $on    = $item->on ? ('ON ' . implode(' ', $item->on)) : '';
             return ' ' . $item->league . ' ' . $item->table . ' ' . $alias . ' ' . $on;
         }, $builder->join);
 
@@ -51,6 +51,16 @@ class Grammar implements GrammarInterface
     protected function compileSelect(Builder $builder)
     {
         return implode(', ', $builder->select);
+    }
+
+    protected function compileLimit(Builder $builder)
+    {
+        return ' LIMIT ' . $builder->limit;
+    }
+
+    protected function compileOffset(Builder $builder)
+    {
+        return ' OFFSET ' . $builder->offset;
     }
 
     protected function compileOrder(Builder $builder)

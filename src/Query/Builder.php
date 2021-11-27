@@ -47,6 +47,16 @@ class Builder
     /**
      * @var array
      */
+    public int $limit;
+
+    /**
+     * @var int
+     */
+    public int $offset;
+
+    /**
+     * @var array
+     */
     public array $bindings = [];
 
     /**
@@ -162,7 +172,7 @@ class Builder
      *
      * @return Join
      */
-    public function join($table, $alias, $league = 'INNER JOIN')
+    public function join($table, ?string $alias = null, $league = 'INNER JOIN')
     {
         return $this->join[] = new Join($this, $table, $alias, $league);
     }
@@ -173,14 +183,14 @@ class Builder
      *
      * @return Join
      */
-    public function leftJoin($table, $alias)
+    public function leftJoin($table, ?string $alias = null)
     {
-        return $this->join($this, $table, $alias, 'LEFT OUT JOIN');
+        return $this->join($table, $alias, 'LEFT OUTER JOIN');
     }
 
-    public function rightJoin($table, $alias)
+    public function rightJoin($table, ?string $alias = null)
     {
-        return $this->join($this, $table, $alias, 'RIGHT OUT JOIN');
+        return $this->join($table, $alias, 'RIGHT OUTER JOIN');
     }
 
     public function whereBetween($column, $start, $end)
@@ -237,6 +247,20 @@ class Builder
     public function having($first, $operator, $last)
     {
         $this->having[] = func_get_args();
+
+        return $this;
+    }
+
+    public function limit(int $limit)
+    {
+        $this->limit = $limit;
+
+        return $this;
+    }
+
+    public function offset(int $offset)
+    {
+        $this->offset = $offset;
 
         return $this;
     }
