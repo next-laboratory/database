@@ -9,9 +9,11 @@ use Max\Utils\Contracts\Arrayable;
 use Max\Utils\Str;
 use Max\Utils\Traits\HasAttributes;
 
+/**
+ * @mixin AbstractBuilder
+ */
 class Model implements ArrayAccess, Arrayable
 {
-
     use HasAttributes;
 
     protected $table;
