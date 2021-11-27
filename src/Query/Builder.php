@@ -165,6 +165,14 @@ class Builder
         return $this;
     }
 
+    public function whereRaw(string $expression, array $bindings = [])
+    {
+        $this->where[] = new Expression($expression);
+        $this->setBindings($bindings);
+
+        return $this;
+    }
+
     /**
      * @param        $table
      * @param        $alias
@@ -307,7 +315,7 @@ class Builder
 
     protected function aggregate(string $expression): int
     {
-        return (int)$this->run($this->toSql((array)($expression . 'AS AGGREGATE ')))
+        return (int)$this->run($this->toSql((array)($expression . ' AS AGGREGATE ')))
                          ->fetchColumn(0);
     }
 

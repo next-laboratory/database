@@ -4,8 +4,8 @@ namespace Max\Database\Query\Grammar;
 
 use Max\Database\Contracts\GrammarInterface;
 use Max\Database\Query\Builder;
+use Max\Database\Query\Expression;
 use Max\Database\Query\Join;
-use Max\Database\Query\Raw;
 
 class Grammar implements GrammarInterface
 {
@@ -38,7 +38,7 @@ class Grammar implements GrammarInterface
     {
         $whereCondition = [];
         foreach ($builder->where as $where) {
-            $whereCondition[] = implode(' ', $where);
+            $whereCondition[] = $where instanceof Expression ? $where->__toString() : implode(' ', $where);
         }
         return ' WHERE ' . implode(' AND ', $whereCondition);
     }
@@ -66,7 +66,7 @@ class Grammar implements GrammarInterface
     protected function compileOrder(Builder $builder)
     {
         $orderBy = array_map(function($item) {
-            return $item[0] instanceof Raw ? $item[0]->__toString() : implode(' ', $item);
+            return $item[0] instanceof Expression ? $item[0]->__toString() : implode(' ', $item);
         }, $builder->order);
 
         return ' ORDER BY ' . implode(', ', $orderBy);
@@ -111,7 +111,7 @@ class Grammar implements GrammarInterface
     {
         $columns = $values = [];
         foreach ($data as $key => $value) {
-            if ($value instanceof Raw) {
+            if ($value instanceof Expression) {
                 $placeHolder = $value->__toString();
             } else {
                 $placeHolder = '?';
