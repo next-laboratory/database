@@ -358,9 +358,9 @@ class Builder
         return (bool)$this->run($query)->fetchColumn(0);
     }
 
-    public function column(string $column, string $key = null)
+    public function column(string $column, ?string $key = null)
     {
-        $result = $this->run($this->toSql())->fetchAll();
+       $result = $this->run($this->toSql(array_filter([$column, $key])))->fetchAll();
 
         return Collection::make($result ?: [])->pluck($column, $key);
     }
