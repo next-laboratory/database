@@ -275,7 +275,15 @@ class Builder
 
     public function toSql($columns = ['*']): string
     {
-        $this->select($columns);
+        if (empty($this->select)) {
+            $this->select($columns);
+        } else {
+            if (['*'] === $columns) {
+                $this->select();
+            } else {
+                $this->select(array_merge($this->select, $columns));
+            }
+        }
 
         return $this->grammar->generateSelectQuery($this);
     }
