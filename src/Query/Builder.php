@@ -375,6 +375,11 @@ class Builder
         return $this->run($this->toSql($columns))->fetch(\PDO::FETCH_ASSOC);
     }
 
+    public function delete()
+    {
+        return $this->run($this->grammar->generateDeleteQuery($this))->rowCount();
+    }
+
     public function insert(array $data)
     {
         $this->column   = array_keys($data);

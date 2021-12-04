@@ -126,4 +126,11 @@ class Grammar implements GrammarInterface
         return sprintf('UPDATE %s SET %s%s', $builder->from[0], implode(', ', $columns), $where);
     }
 
+    public function generateDeleteQuery(Builder $builder)
+    {
+        $where = $this->compileWhere($builder);
+        
+        return sprintf('DELETE FROM %s %s', $builder->from[0], $where);
+    }
+
 }
