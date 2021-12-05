@@ -4,19 +4,14 @@ namespace Max\Database;
 
 use ArrayAccess;
 use Max\Database\Model\Relations\HasOne;
-use Max\Foundation\App;
 use Max\Utils\Contracts\Arrayable;
-use Max\Utils\Str;
 use Max\Utils\Traits\HasAttributes;
 
-/**
- * @mixin AbstractBuilder
- */
 class Model implements ArrayAccess, Arrayable
 {
-    use HasAttributes;
-
     protected $table;
+
+    protected $connect = 'mysql';
 
     protected $key = 'id';
 
@@ -30,7 +25,8 @@ class Model implements ArrayAccess, Arrayable
 
     public function __construct(array $attributes = [])
     {
-        is_null($this->table) && $this->table = Str::camel(class_basename(static::class));
+        $this->original = $attributes;
+//        is_null($this->table) && $this->table = Str::camel(class_basename(static::class));
 
         $this->fill($attributes);
     }
@@ -68,9 +64,14 @@ class Model implements ArrayAccess, Arrayable
      *
      * @return Model
      */
-    public static function find($id, array $columns = [])
+    public static function find($id, array $columns = ['*'])
     {
         return static::query()->find($id, $columns);
+    }
+
+    public static function first(array $columns = ['*'])
+    {
+        return static::query()->limit(1)->first($columns);
     }
 
     public function getKey()
@@ -93,11 +94,12 @@ class Model implements ArrayAccess, Arrayable
 
     public static function all(array $columns = ['*'])
     {
-        return static::query()->select($columns);
+        return static::query()->get($columns);
     }
 
     /**
-     * @return Query
+     * @return \Max\Database\Model\Builder
+     * @throws \ReflectionException
      */
     public static function query()
     {
@@ -110,11 +112,8 @@ class Model implements ArrayAccess, Arrayable
      */
     public function newQuery()
     {
-        return App::getInstance()
-                  ->resolve(Query::class)
-                  ->setModel(static::class)
-                  ->setTable($this->table)
-                  ->setPrimaryKey($this->key);
+        return (new \Max\Database\Model\Builder((new Manager(config('database')))->getConnector($this->connect)))
+            ->setModel($this);
     }
 
     public function save()
@@ -170,6 +169,68 @@ class Model implements ArrayAccess, Arrayable
     public function toArray(): array
     {
         return $this->attributes;
+    }
+
+    protected $attributes;
+
+    public function hasAttribute($key)
+    {
+        return isset($this->attributes[$key]);
+    }
+
+    public function getAttribute($key)
+    {
+        return $this->attributes[$key] ?? null;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAttributes()
+    {
+        return $this->attributes;
+    }
+
+    /**
+     * @param mixed $attributes
+     */
+    public function setAttributes($attributes): void
+    {
+        $this->attributes = $attributes;
+    }
+
+    public function __get($key)
+    {
+        return $this->getAttribute($key);
+    }
+
+    public function __set($key, $value)
+    {
+        $this->original[$key] = $value;
+        return $this->setAttribute($key, $value);
+    }
+
+    public function offsetExists($offset)
+    {
+        return $this->hasAttribute($offset);
+    }
+
+    public function offsetGet($offset)
+    {
+        return $this->getAttribute($offset);
+    }
+
+    public function offsetSet($offset, $value)
+    {
+        $this->original[$offset] = $value;
+        $this->setAttribute($offset, $value);
+    }
+
+    public function offsetUnset($offset)
+    {
+        if ($this->hasAttribute($offset)) {
+            unset($this->attributes[$offset]);
+        }
     }
 
 }

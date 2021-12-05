@@ -33,7 +33,7 @@ class Manager
 
     /**
      * @param        $name
-     * @param null   $alias
+     * @param null $alias
      * @param string $connection
      *
      * @return Builder
@@ -86,13 +86,6 @@ class Manager
      */
     public function connect(?string $name = null)
     {
-        $name = $name ?? $this->config['default'];
-        if (!$this->hasConnection($name)) {
-            $config                  = new Config($this->config['connections'][$name]);
-            $connector               = $config->getDriver();
-            $this->connectors[$name] = new $connector($config);
-        }
-
         return new Builder($this->getConnector($name));
     }
 
@@ -103,6 +96,13 @@ class Manager
      */
     public function getConnector($name): ConnectorInterface
     {
+        $name = $name ?? $this->config['default'];
+        if (!$this->hasConnection($name)) {
+            $config = new Config($this->config['connections'][$name]);
+            $connector = $config->getDriver();
+            $this->connectors[$name] = new $connector($config);
+        }
+
         return $this->connectors[$name];
     }
 
