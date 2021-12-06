@@ -26,6 +26,11 @@ class Manager
         $this->config = $config;
     }
 
+    /**
+     * @param Repository $repository
+     *
+     * @return static
+     */
     public static function __setter(Repository $repository)
     {
         return new static($repository->get('database'));
@@ -43,21 +48,49 @@ class Manager
         return $this->connect($connection)->from($name, $alias);
     }
 
+    /**
+     * @param string      $query
+     * @param array       $bindings
+     * @param string|null $connection
+     *
+     * @return array|false
+     */
     public function select(string $query, array $bindings = [], ?string $connection = null)
     {
         return $this->connect($connection)->run($query, $bindings)->fetchAll(\PDO::FETCH_ASSOC);
     }
 
+    /**
+     * @param string      $query
+     * @param array       $bindings
+     * @param string|null $connection
+     *
+     * @return mixed
+     */
     public function first(string $query, array $bindings = [], ?string $connection = null)
     {
         return $this->connect($connection)->run($query, $bindings)->fetch(\PDO::FETCH_ASSOC);
     }
 
+    /**
+     * @param string      $query
+     * @param array       $bindings
+     * @param string|null $connection
+     *
+     * @return int
+     */
     public function delete(string $query, array $bindings = [], ?string $connection = null)
     {
         return $this->connect($connection)->run($query, $bindings)->rowCount();
     }
 
+    /**
+     * @param string      $query
+     * @param array       $bindings
+     * @param string|null $connection
+     *
+     * @return false|string
+     */
     public function insert(string $query, array $bindings = [], ?string $connection = null)
     {
         $this->connect($connection)->run($query, $bindings);
@@ -65,11 +98,21 @@ class Manager
         return $this->getConnector($connection)->getPdo()->lastInsertId();
     }
 
+    /**
+     * @return void
+     */
     public function update()
     {
 
     }
 
+    /**
+     * @param string      $query
+     * @param array       $bindings
+     * @param string|null $connection
+     *
+     * @return \Generator
+     */
     public function cursor(string $query, array $bindings = [], ?string $connection = null)
     {
         $cursor = $this->connect($connection)->run($query, $bindings);

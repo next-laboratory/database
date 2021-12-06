@@ -37,6 +37,9 @@ abstract class Connector implements ConnectorInterface
      */
     protected string $driver = '';
 
+    /**
+     * @var GrammarInterface|null
+     */
     protected ?GrammarInterface $grammar;
 
     /**
@@ -54,11 +57,19 @@ abstract class Connector implements ConnectorInterface
         $this->getGrammar();
     }
 
+    /**
+     * @param Config $config
+     *
+     * @return array
+     */
     protected function getOptions(Config $config)
     {
         return array_merge($this->options, $config->getOptions());
     }
 
+    /**
+     * @return GrammarInterface
+     */
     public function getGrammar(): GrammarInterface
     {
         if (!isset($this->grammar)) {
@@ -135,6 +146,12 @@ abstract class Connector implements ConnectorInterface
         return $this->PDO;
     }
 
+    /**
+     * @param       $query
+     * @param array $bindings
+     *
+     * @return array|false
+     */
     public function select($query, array $bindings = [])
     {
         $PDOStatement = $this->statement($query, $bindings);

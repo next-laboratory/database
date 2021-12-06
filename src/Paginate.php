@@ -16,9 +16,6 @@ class Paginate extends Collection
     {
         $this->page        = $page;
         $this->sizePerPage = $sizePerPage;
-        
-        
-        
     }
 
     public function raw()

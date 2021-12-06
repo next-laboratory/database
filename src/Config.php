@@ -2,22 +2,66 @@
 
 namespace Max\Database;
 
-use PDO;
-
 class Config
 {
+    /**
+     * @var string|null
+     */
     protected ?string $dsn;
-    protected string  $driver;
-    protected string  $grammar;
-    protected string  $database;
-    protected string  $host     = '127.0.0.1';
-    protected ?string $user     = null;
-    protected ?string $password = null;
-    protected int     $port     = 3306;
-    protected array   $options  = [];
-    protected string  $charset  = 'utf8';
-    protected string  $prefix   = '';
 
+    /**
+     * @var string
+     */
+    protected string $driver;
+
+    /**
+     * @var string
+     */
+    protected string $grammar;
+
+    /**
+     * @var string
+     */
+    protected string $database;
+
+    /**
+     * @var string
+     */
+    protected string $host = '127.0.0.1';
+
+    /**
+     * @var string|null
+     */
+    protected ?string $user = null;
+
+    /**
+     * @var string|null
+     */
+    protected ?string $password = null;
+
+    /**
+     * @var int
+     */
+    protected int $port = 3306;
+
+    /**
+     * @var array
+     */
+    protected array $options = [];
+
+    /**
+     * @var string
+     */
+    protected string $charset = 'utf8';
+
+    /**
+     * @var string
+     */
+    protected string $prefix = '';
+
+    /**
+     * @param array $config
+     */
     public function __construct(array $config)
     {
         foreach ($config as $key => $value) {

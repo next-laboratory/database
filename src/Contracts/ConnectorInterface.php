@@ -14,9 +14,20 @@ interface ConnectorInterface
      */
     public function statement(string $query, array $bindings);
 
+    /**
+     * @return \PDO
+     */
     public function getPdo(): \PDO;
 
+    /**
+     * @param Config $config
+     *
+     * @return string
+     */
     public function getDsn(Config $config): string;
 
+    /**
+     * @return GrammarInterface
+     */
     public function getGrammar(): GrammarInterface;
 }

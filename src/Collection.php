@@ -5,5 +5,4 @@ namespace Max\Database;
 
 class Collection extends \Max\Utils\Collection
 {
-
 }

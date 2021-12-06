@@ -9,6 +9,9 @@ use Max\Database\Query\Join;
 
 class Grammar implements GrammarInterface
 {
+    /**
+     * @var array|string[]
+     */
     protected array $select = [
         'aggregate',
         'select',
@@ -23,6 +26,11 @@ class Grammar implements GrammarInterface
         'lock'
     ];
 
+    /**
+     * @param Builder $builder
+     *
+     * @return string
+     */
     protected function compileJoin(Builder $builder)
     {
         $joins = array_map(function(Join $item) {
@@ -34,6 +42,11 @@ class Grammar implements GrammarInterface
         return implode('', $joins);
     }
 
+    /**
+     * @param Builder $builder
+     *
+     * @return string
+     */
     protected function compileWhere(Builder $builder)
     {
         $whereCondition = [];
@@ -43,26 +56,51 @@ class Grammar implements GrammarInterface
         return ' WHERE ' . implode(' AND ', $whereCondition);
     }
 
+    /**
+     * @param Builder $builder
+     *
+     * @return string
+     */
     protected function compileFrom(Builder $builder)
     {
         return ' FROM ' . implode(' AS ', array_filter($builder->from));
     }
 
+    /**
+     * @param Builder $builder
+     *
+     * @return string
+     */
     protected function compileSelect(Builder $builder)
     {
         return implode(', ', $builder->select);
     }
 
+    /**
+     * @param Builder $builder
+     *
+     * @return string
+     */
     protected function compileLimit(Builder $builder)
     {
         return ' LIMIT ' . $builder->limit;
     }
 
+    /**
+     * @param Builder $builder
+     *
+     * @return string
+     */
     protected function compileOffset(Builder $builder)
     {
         return ' OFFSET ' . $builder->offset;
     }
 
+    /**
+     * @param Builder $builder
+     *
+     * @return string
+     */
     protected function compileOrder(Builder $builder)
     {
         $orderBy = array_map(function($item) {
@@ -72,11 +110,21 @@ class Grammar implements GrammarInterface
         return ' ORDER BY ' . implode(', ', $orderBy);
     }
 
+    /**
+     * @param Builder $builder
+     *
+     * @return string
+     */
     protected function compileGroup(Builder $builder)
     {
         return ' GROUP BY ' . implode(', ', $builder->group);
     }
 
+    /**
+     * @param Builder $builder
+     *
+     * @return string
+     */
     protected function compileHaving(Builder $builder)
     {
         $having = array_map(function($item) {
@@ -86,6 +134,11 @@ class Grammar implements GrammarInterface
         return ' HAVING ' . implode(' AND ', $having);
     }
 
+    /**
+     * @param Builder $builder
+     *
+     * @return string
+     */
     public function generateSelectQuery(Builder $builder)
     {
         $query = 'SELECT ';
@@ -98,6 +151,11 @@ class Grammar implements GrammarInterface
         return $query;
     }
 
+    /**
+     * @param Builder $builder
+     *
+     * @return string
+     */
     public function generateInsertQuery(Builder $builder)
     {
         $columns = implode(', ', $builder->column);
@@ -107,6 +165,12 @@ class Grammar implements GrammarInterface
         return sprintf('INSERT INTO %s(%s) VALUES(%s)', $table, $columns, $value);
     }
 
+    /**
+     * @param Builder $builder
+     * @param array   $data
+     *
+     * @return string
+     */
     public function generateUpdateQuery(Builder $builder, array $data)
     {
         $columns = $values = [];
@@ -126,10 +190,15 @@ class Grammar implements GrammarInterface
         return sprintf('UPDATE %s SET %s%s', $builder->from[0], implode(', ', $columns), $where);
     }
 
+    /**
+     * @param Builder $builder
+     *
+     * @return string
+     */
     public function generateDeleteQuery(Builder $builder)
     {
         $where = $this->compileWhere($builder);
-        
+
         return sprintf('DELETE FROM %s %s', $builder->from[0], $where);
     }
 

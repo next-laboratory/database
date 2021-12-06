@@ -168,6 +168,12 @@ class Builder
         return $this;
     }
 
+    /**
+     * @param string $expression
+     * @param array  $bindings
+     *
+     * @return $this
+     */
     public function whereRaw(string $expression, array $bindings = [])
     {
         $this->where[] = new Expression($expression);
@@ -199,11 +205,24 @@ class Builder
         return $this->join($table, $alias, 'LEFT OUTER JOIN');
     }
 
+    /**
+     * @param             $table
+     * @param string|null $alias
+     *
+     * @return Join
+     */
     public function rightJoin($table, ?string $alias = null)
     {
         return $this->join($table, $alias, 'RIGHT OUTER JOIN');
     }
 
+    /**
+     * @param $column
+     * @param $start
+     * @param $end
+     *
+     * @return $this
+     */
     public function whereBetween($column, $start, $end)
     {
         $this->addBindings([$start, $end]);
@@ -211,6 +230,11 @@ class Builder
         return $this->where($column, 'BETWEEN(? and ?)');
     }
 
+    /**
+     * @param $value
+     *
+     * @return void
+     */
     protected function addBindings($value)
     {
         if (is_array($value)) {
@@ -220,11 +244,19 @@ class Builder
         }
     }
 
+    /**
+     * @return array
+     */
     public function getBindings(): array
     {
         return $this->bindings;
     }
 
+    /**
+     * @param $bindings
+     *
+     * @return void
+     */
     public function setBindings($bindings)
     {
         if (is_array($bindings)) {
@@ -234,6 +266,11 @@ class Builder
         }
     }
 
+    /**
+     * @param array $columns
+     *
+     * @return $this
+     */
     public function select(array $columns = ['*'])
     {
         $this->select = $columns;
@@ -241,6 +278,12 @@ class Builder
         return $this;
     }
 
+    /**
+     * @param $column
+     * @param $order
+     *
+     * @return $this
+     */
     public function order($column, $order = '')
     {
         $this->order[] = func_get_args();
@@ -248,6 +291,11 @@ class Builder
         return $this;
     }
 
+    /**
+     * @param $column
+     *
+     * @return $this
+     */
     public function group($column)
     {
         $this->group[] = $column;
@@ -255,6 +303,13 @@ class Builder
         return $this;
     }
 
+    /**
+     * @param $first
+     * @param $operator
+     * @param $last
+     *
+     * @return $this
+     */
     public function having($first, $operator, $last)
     {
         $this->having[] = func_get_args();
@@ -262,6 +317,11 @@ class Builder
         return $this;
     }
 
+    /**
+     * @param int $limit
+     *
+     * @return $this
+     */
     public function limit(int $limit)
     {
         $this->limit = $limit;
@@ -269,6 +329,11 @@ class Builder
         return $this;
     }
 
+    /**
+     * @param int $offset
+     *
+     * @return $this
+     */
     public function offset(int $offset)
     {
         $this->offset = $offset;
@@ -276,6 +341,11 @@ class Builder
         return $this;
     }
 
+    /**
+     * @param $columns
+     *
+     * @return string
+     */
     public function toSql($columns = ['*']): string
     {
         if (empty($this->select)) {
@@ -291,6 +361,11 @@ class Builder
         return $this->grammar->generateSelectQuery($this);
     }
 
+    /**
+     * @param array $columns
+     *
+     * @return Collection
+     */
     public function get(array $columns = ['*'])
     {
         return Collection::make(
@@ -299,31 +374,61 @@ class Builder
         );
     }
 
+    /**
+     * @param $column
+     *
+     * @return int
+     */
     public function count($column = '*'): int
     {
         return $this->aggregate("COUNT({$column})");
     }
 
+    /**
+     * @param $column
+     *
+     * @return int
+     */
     public function sum($column): int
     {
         return $this->aggregate("SUM($column)");
     }
 
+    /**
+     * @param $column
+     *
+     * @return int
+     */
     public function max($column): int
     {
         return $this->aggregate("MAX({$column})");
     }
 
+    /**
+     * @param $column
+     *
+     * @return int
+     */
     public function min($column): int
     {
         return $this->aggregate("MIN({$column})");
     }
 
+    /**
+     * @param $column
+     *
+     * @return int
+     */
     public function avg($column): int
     {
         return $this->aggregate("AVG({$column})");
     }
 
+    /**
+     * @param string $expression
+     *
+     * @return int
+     */
     protected function aggregate(string $expression): int
     {
         return (int)$this->run($this->toSql((array)($expression . ' AS AGGREGATE ')))
@@ -351,6 +456,9 @@ class Builder
         }
     }
 
+    /**
+     * @return bool
+     */
     public function exists(): bool
     {
         $query = sprintf('SELECT EXISTS(%s) AS MAX_EXIST', $this->toSql());
@@ -358,6 +466,12 @@ class Builder
         return (bool)$this->run($query)->fetchColumn(0);
     }
 
+    /**
+     * @param string      $column
+     * @param string|null $key
+     *
+     * @return Collection
+     */
     public function column(string $column, ?string $key = null)
     {
        $result = $this->run($this->toSql(array_filter([$column, $key])))->fetchAll();
@@ -365,21 +479,40 @@ class Builder
         return Collection::make($result ?: [])->pluck($column, $key);
     }
 
+    /**
+     * @param       $id
+     * @param array $columns
+     *
+     * @return mixed
+     */
     public function find($id, array $columns = ['*'])
     {
         return $this->where('id', '=', $id)->first($columns);
     }
 
+    /**
+     * @param array $columns
+     *
+     * @return mixed
+     */
     public function first(array $columns = ['*'])
     {
         return $this->run($this->toSql($columns))->fetch(\PDO::FETCH_ASSOC);
     }
 
+    /**
+     * @return int
+     */
     public function delete()
     {
         return $this->run($this->grammar->generateDeleteQuery($this))->rowCount();
     }
 
+    /**
+     * @param array $data
+     *
+     * @return false|string
+     */
     public function insert(array $data)
     {
         $this->column   = array_keys($data);
@@ -389,6 +522,11 @@ class Builder
         return $this->connector->getPDO()->lastInsertId();
     }
 
+    /**
+     * @param array $data
+     *
+     * @return array|false[]|string[]
+     */
     public function insertAll(array $data)
     {
         return array_map(function($item) {
@@ -396,6 +534,11 @@ class Builder
         }, $data);
     }
 
+    /**
+     * @param array $data
+     *
+     * @return int
+     */
     public function update(array $data)
     {
         $query = $this->grammar->generateUpdateQuery($this, $data);
@@ -403,6 +546,11 @@ class Builder
         return $this->run($query)->rowCount();
     }
 
+    /**
+     * @param string $query
+     *
+     * @return \PDOStatement
+     */
     public function run(string $query): \PDOStatement
     {
         $PDOStatement = $this->connector->statement($query, $this->bindings);
