@@ -112,6 +112,14 @@ class Model implements ArrayAccess, Arrayable
         return static::query()->find($id, $columns);
     }
 
+    public function findOrFail($id, array $columns = ['*'])
+    {
+        if ($item = static::query()->find($id, $columns)) {
+            return $item;
+        }
+        throw new \Exception('模型未找到');
+    }
+
     /**
      * @param array $columns
      *

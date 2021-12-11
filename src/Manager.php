@@ -31,7 +31,7 @@ class Manager
      *
      * @return static
      */
-    public static function __setter(Repository $repository)
+    public static function __new(Repository $repository)
     {
         return new static($repository->get('database'));
     }
