@@ -163,7 +163,7 @@ class Builder
             return $this;
         }
         $this->addBindings($in);
-        $this->where($column, sprintf('(%s)', rtrim(str_repeat('?, ', count($in)), ' ,')), 'IN');
+        $this->where[] = [$column, 'IN', sprintf('(%s)', rtrim(str_repeat('?, ', count($in)), ' ,'))];
 
         return $this;
     }
@@ -519,8 +519,9 @@ class Builder
      */
     public function insert(array $data)
     {
-        $this->column = array_keys($data);
-        $this->connector->run($this->generateInsertQuery(), $this->bindings = array_values($data));
+        $this->column   = array_keys($data);
+        $this->bindings = array_values($data);
+        $this->connector->run($this->generateInsertQuery(), $this->bindings);
 
         return $this->connector->getPDO()->lastInsertId();
     }
