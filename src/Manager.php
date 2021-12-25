@@ -37,15 +37,16 @@ class Manager
     }
 
     /**
-     * @param        $name
-     * @param null $alias
-     * @param string $connection
+     * @param             $name
+     * @param null        $alias
+     * @param string|null $connection
      *
      * @return Builder
      */
-    public function table($name, $alias = null, $connection = null)
+    public function table($name, $alias = null, ?string $connection = null)
     {
-        return $this->connect($connection)->from($name, $alias);
+        $builder = new Builder($this->getConnector($name));
+        return $builder->from($name, $alias);
     }
 
     /**
@@ -58,18 +59,6 @@ class Manager
     public function select(string $query, array $bindings = [], ?string $connection = null)
     {
         return $this->connect($connection)->run($query, $bindings)->fetchAll(\PDO::FETCH_ASSOC);
-    }
-
-    /**
-     * @param string      $query
-     * @param array       $bindings
-     * @param string|null $connection
-     *
-     * @return mixed
-     */
-    public function first(string $query, array $bindings = [], ?string $connection = null)
-    {
-        return $this->connect($connection)->run($query, $bindings)->fetch(\PDO::FETCH_ASSOC);
     }
 
     /**
@@ -93,9 +82,25 @@ class Manager
      */
     public function insert(string $query, array $bindings = [], ?string $connection = null)
     {
-        $this->connect($connection)->run($query, $bindings);
+        $connector = $this->connect($connection);
+        $connector->run($query, $bindings);
 
-        return $this->getConnector($connection)->getPdo()->lastInsertId();
+        return $connector->getPdo()->lastInsertId();
+    }
+
+    /**
+     * @param string      $query
+     * @param array       $bindings
+     * @param string|null $connection
+     *
+     * @return int
+     */
+    public function exec(string $query, array $bindings = [], ?string $connection = null)
+    {
+        /** @var \PDOStatement $PDOStatement */
+        $PDOStatement = $this->connect($connection)->run($query, $bindings);
+
+        return $PDOStatement->rowCount();
     }
 
     /**
@@ -123,48 +128,19 @@ class Manager
     }
 
     /**
-     * @param string $name
-     *
-     * @return Builder
-     */
-    public function connect(?string $name = null)
-    {
-        return new Builder($this->getConnector($name));
-    }
-
-    /**
-     * @param $name
+     * @param string|null $name
      *
      * @return ConnectorInterface
      */
-    public function getConnector($name): ConnectorInterface
+    public function connect(?string $name = null)
     {
         $name = $name ?? $this->config['default'];
-        if (!$this->hasConnection($name)) {
-            $config = new Config($this->config['connections'][$name]);
-            $connector = $config->getDriver();
+        if (!isset($this->connectors[$name])) {
+            $config                  = new Config($this->config['connections'][$name]);
+            $connector               = $config->getDriver();
             $this->connectors[$name] = new $connector($config);
         }
 
         return $this->connectors[$name];
-    }
-
-    /**
-     * @param                    $name
-     * @param ConnectorInterface $connection
-     */
-    public function setConnector($name, ConnectorInterface $connection)
-    {
-        $this->connectors[$name] = $connection;
-    }
-
-    /**
-     * @param $name
-     *
-     * @return bool
-     */
-    public function hasConnection($name)
-    {
-        return isset($this->connectors[$name]);
     }
 }

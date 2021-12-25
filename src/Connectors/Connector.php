@@ -38,11 +38,6 @@ abstract class Connector implements ConnectorInterface
     protected string $driver = '';
 
     /**
-     * @var GrammarInterface|null
-     */
-    protected ?GrammarInterface $grammar;
-
-    /**
      * @param Config $config
      */
     public function __construct(Config $config)
@@ -54,7 +49,6 @@ abstract class Connector implements ConnectorInterface
             $config->getPassword(),
             $this->getOptions($config)
         );
-        $this->getGrammar();
     }
 
     /**
@@ -65,28 +59,6 @@ abstract class Connector implements ConnectorInterface
     protected function getOptions(Config $config)
     {
         return array_merge($this->options, $config->getOptions());
-    }
-
-    /**
-     * @return GrammarInterface
-     */
-    public function getGrammar(): GrammarInterface
-    {
-        if (!isset($this->grammar)) {
-            switch (true) {
-                case $this instanceof MySqlConnector:
-                    $this->grammar = new MySqlGrammar();
-                    break;
-                case $this instanceof PsqlConnector:
-                    $this->grammar = new PgSqlGrammar();
-                    break;
-                default:
-                    $this->grammar = new Grammar();
-                    break;
-            }
-        }
-
-        return $this->grammar;
     }
 
     /**
@@ -117,9 +89,7 @@ abstract class Connector implements ConnectorInterface
     public function statement(string $query, array $bindings = [])
     {
         $statement = $this->getPdo()->prepare($query);
-
         $this->bindValue($statement, $bindings);
-
         return $statement;
     }
 
@@ -147,19 +117,24 @@ abstract class Connector implements ConnectorInterface
     }
 
     /**
-     * @param       $query
-     * @param array $bindings
+     * @param string $query
+     * @param array  $bindings
      *
-     * @return array|false
+     * @return \PDOStatement
      */
-    public function select($query, array $bindings = [])
+    public function run(string $query, array $bindings = []): \PDOStatement
     {
-        $PDOStatement = $this->statement($query, $bindings);
-
-        $PDOStatement->execute();
-
-        return $PDOStatement->fetchAll(\PDO::FETCH_ASSOC);
+        try {
+            $PDOStatement = $this->statement($query, $bindings);
+            $PDOStatement->execute();
+            return $PDOStatement;
+        } catch (\PDOException $PDOException) {
+            throw new \PDOException(
+                $PDOException->getMessage() . (isset($query) ? sprintf(' (SQL: %s)', $query) : ''),
+                (int)$PDOException->getCode(),
+                $PDOException->getPrevious()
+            );
+        }
     }
-
 }
 

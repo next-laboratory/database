@@ -25,9 +25,4 @@ interface ConnectorInterface
      * @return string
      */
     public function getDsn(Config $config): string;
-
-    /**
-     * @return GrammarInterface
-     */
-    public function getGrammar(): GrammarInterface;
 }
