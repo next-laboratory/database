@@ -48,13 +48,13 @@ class Join
     }
 
     /**
-     * @param $first
-     * @param $operator
-     * @param $last
+     * @param        $first
+     * @param        $last
+     * @param string $operator
      *
      * @return Builder
      */
-    public function on($first, $operator, $last)
+    public function on($first, $last, string $operator = '=')
     {
         $this->on = func_get_args();
 
