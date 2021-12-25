@@ -45,7 +45,7 @@ class Manager
      */
     public function table($name, $alias = null, ?string $connection = null)
     {
-        $builder = new Builder($this->getConnector($name));
+        $builder = new Builder($this->connect($name));
         return $builder->from($name, $alias);
     }
 
