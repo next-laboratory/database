@@ -3,10 +3,15 @@
 namespace Max\Database\Query;
 
 use Max\Database\Collection;
-use Max\Database\Connector;
 use Max\Database\Contracts\ConnectorInterface;
-use Max\Database\Contracts\GrammarInterface;
 
+/**
+ * @class   Builder
+ * @author  ChengYao
+ * @date    2021/12/25
+ * @time    14:21
+ * @package Max\Database\Query
+ */
 class Builder
 {
     /**
@@ -53,7 +58,7 @@ class Builder
     public array $join;
 
     /**
-     * @var array
+     * @var int
      */
     public int $limit;
 
@@ -71,6 +76,15 @@ class Builder
      * @var ConnectorInterface
      */
     protected ConnectorInterface $connector;
+    /**
+     * @var int[]|string[]
+     */
+    protected array $column;
+
+    /**
+     * @var string
+     */
+    protected string $connection;
 
     /**
      * @param ConnectorInterface $connector
@@ -183,9 +197,9 @@ class Builder
     }
 
     /**
-     * @param        $table
-     * @param        $alias
-     * @param string $league
+     * @param          $table
+     * @param  ?string $alias
+     * @param string   $league
      *
      * @return Join
      */
@@ -342,11 +356,11 @@ class Builder
     }
 
     /**
-     * @param $columns
+     * @param array $columns
      *
      * @return string
      */
-    public function toSql($columns = ['*']): string
+    public function toSql(array $columns = ['*']): string
     {
         if (empty($this->select)) {
             $this->select($columns);
@@ -375,7 +389,7 @@ class Builder
     }
 
     /**
-     * @param $column
+     * @param string|int $column
      *
      * @return int
      */
@@ -531,7 +545,7 @@ class Builder
      *
      * @return array|false[]|string[]
      */
-    public function insertAll(array $data)
+    public function insertAll(array $data): array
     {
         return array_map(function($item) {
             return $this->insert($item);
@@ -543,7 +557,7 @@ class Builder
      *
      * @return int
      */
-    public function update(array $data)
+    public function update(array $data): int
     {
         $query = $this->generateUpdateQuery($data);
 
@@ -553,7 +567,7 @@ class Builder
     /**
      * @return string
      */
-    protected function compileJoin()
+    protected function compileJoin(): string
     {
         $joins = array_map(function(Join $item) {
             $alias = $item->alias ? 'AS ' . $item->alias : '';
@@ -565,11 +579,9 @@ class Builder
     }
 
     /**
-     * @param
-     *
      * @return string
      */
-    protected function compileWhere()
+    protected function compileWhere(): string
     {
         $whereCondition = [];
         foreach ($this->where as $where) {
@@ -579,51 +591,41 @@ class Builder
     }
 
     /**
-     * @param
-     *
      * @return string
      */
-    protected function compileFrom()
+    protected function compileFrom(): string
     {
         return ' FROM ' . implode(' AS ', array_filter($this->from));
     }
 
     /**
-     * @param
-     *
      * @return string
      */
-    protected function compileSelect()
+    protected function compileSelect(): string
     {
         return implode(', ', $this->select);
     }
 
     /**
-     * @param
-     *
      * @return string
      */
-    protected function compileLimit()
+    protected function compileLimit(): string
     {
         return ' LIMIT ' . $this->limit;
     }
 
     /**
-     * @param
-     *
      * @return string
      */
-    protected function compileOffset()
+    protected function compileOffset(): string
     {
         return ' OFFSET ' . $this->offset;
     }
 
     /**
-     * @param
-     *
      * @return string
      */
-    protected function compileOrder()
+    protected function compileOrder(): string
     {
         $orderBy = array_map(function($item) {
             return $item[0] instanceof Expression ? $item[0]->__toString() : implode(' ', $item);
@@ -633,21 +635,17 @@ class Builder
     }
 
     /**
-     * @param
-     *
      * @return string
      */
-    protected function compileGroup()
+    protected function compileGroup(): string
     {
         return ' GROUP BY ' . implode(', ', $this->group);
     }
 
     /**
-     * @param
-     *
      * @return string
      */
-    protected function compileHaving()
+    protected function compileHaving(): string
     {
         $having = array_map(function($item) {
             return implode(' ', $item);
@@ -657,11 +655,9 @@ class Builder
     }
 
     /**
-     * @param
-     *
      * @return string
      */
-    public function generateSelectQuery()
+    public function generateSelectQuery(): string
     {
         $query = 'SELECT ';
         foreach (static::$clause as $value) {
@@ -674,11 +670,9 @@ class Builder
     }
 
     /**
-     * @param
-     *
      * @return string
      */
-    public function generateInsertQuery()
+    public function generateInsertQuery(): string
     {
         $columns = implode(', ', $this->column);
         $value   = implode(', ', array_fill(0, count($this->bindings), '?'));
@@ -692,7 +686,7 @@ class Builder
      *
      * @return string
      */
-    public function generateUpdateQuery(array $data)
+    public function generateUpdateQuery(array $data): string
     {
         $columns = $values = [];
         foreach ($data as $key => $value) {
@@ -706,7 +700,7 @@ class Builder
         }
 
         array_unshift($this->bindings, ...$values);
-        $where = empty($this->where) ? '' : $this->compileWhere($this);
+        $where = empty($this->where) ? '' : $this->compileWhere();
 
         return sprintf('UPDATE %s SET %s%s', $this->from[0], implode(', ', $columns), $where);
     }
@@ -714,11 +708,9 @@ class Builder
     /**
      * @return string
      */
-    public function generateDeleteQuery()
+    public function generateDeleteQuery(): string
     {
-        $where = $this->compileWhere($this);
-
-        return sprintf('DELETE FROM %s %s', $this->from[0], $where);
+        return sprintf('DELETE FROM %s %s', $this->from[0], $this->compileWhere());
     }
 
 }
